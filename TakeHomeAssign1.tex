@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+\usepackage{amsfonts,amsmath,amssymb, listings}
+
+\usepackage[numbered,framed]{matlab-prettifier}
+%\usepackage{color}
+
+%\setcounter{MaxMatrixCols}{10}
+
+\def\stackunder#1#2{\mathrel{\mathop{#2}\limits_{#1}}}%
+
+\newcommand{\fiid}{\func{i.i.d.}} % use this as in: X_i \stackrel{\fiid}{\sim} \func{Exp} \left( \lambda \right)
+\DeclareMathOperator{\Norm}{N}
+
+\newcommand{\platzo}{\vspace*{2cm}}
+\newcommand{\platzt}{\vspace*{4cm}}
+
+\newcommand{\findep}{\func{ind}}  % could use indep instead if ind, but 1st book uses ind.
+
+\newcommand{\R}{\ensuremath{{\mathbb R}}}
+\newcommand{\N}{\ensuremath{{\mathbb N}}}
+\def\QATOP#1#2{{#1 \atop #2}}
+\def\QTATOP#1#2{{\textstyle {#1 \atop #2}}}
+\def\QDATOP#1#2{{\displaystyle {#1 \atop #2}}}
+\voffset=-2.54cm\hoffset=-2.54cm \textheight27cm \textwidth17.0cm \topmargin0.5cm
+\oddsidemargin2.00cm \evensidemargin2.00cm \unitlength1cm
+
+\def\func#1{\mathop{\rm #1}}%
+\def\dint{\mathop{\displaystyle \int}}%
+\newcommand{\Ind}{\ensuremath{{\mathbb I}}} % indicator function
+\newcommand{\E}{\ensuremath{{\mathbb E}}} % expected value
+\newcommand{\Var}{\ensuremath{{\mathbb V}}} % variance
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{Large}
+	\begin{center}
+		\textbf{Statistical Foundations for Finance (Mathematical and Computational Statistics with a View Towards Finance and Risk Management)}
+	\end{center}
+\end{Large}
+
+%\vspace{0.1cm}
+
+\begin{large}	
+	\begin{center}
+		\textbf{Homework 1, due ???, 2022} \vspace{0.1cm} \\ {Prof.\ Dr.\ Marc Paolella }
+	\end{center}
+\end{large}
+
+% MATLAB CODE TO MAKE THE GRADES
+%
+% For the MAS students, grades have to be multiple of 0.5, not 0.25.
+%
+%gra=[110 110 77 77 83 75 75 66 106 75 115 22 72 50 59 73 80 56 65 66 108 71 85 64 50 77 70 45 74 45 89 65 57 82 48 95 75 40 75 101 90 0 38 98 65 67 50 75 82 32 52 80 72 71 100 93 110 105 105 42 55 57 49 42 89 55 80 100 95 57 95 82 65 72 115 ];
+%gra=sort(gra); hist(gra,length(gra)+1), axis([min(gra)-5,max(gra)+5,0,4])
+%rat=1 - (max(gra)-gra)/(max(gra)-min(gra));
+% notenew=0.5+0.25*round(11*rat+8);  [gra' sort(notenew)']
+
+
+\bigskip
+\bigskip
+
+This is a \emph{mandatory} homework, and will enter your grade as if it were a quiz.
+
+\medskip
+
+You, each of you, even if you work in a group, are to hand in a PDF file, and only a pdf file, via email. You name it “Homework1FIRSTNAMELASTNAME.pdf’. It is due at 12:00 noon on DATE, 2022, and you send it to the following email: TO BE DONE.
+
+\medskip
+
+Do not hand in a pile of programs, it is way too unprofessional. The first page should contain your name, matriculation number, course name, and the statement of the problem to be solved. See my email I sent you for more discussion about the format and details of the documents you hand in to me. 
+
+I highly recommend writing in \LaTeX, and your Matlab programs embedded with a package. I suggest:
+
+\begin{verbatim}
+\usepackage[numbered,framed]{matlab-prettifier}
+%\usepackage{color}
+\end{verbatim}
+
+along with:
+
+\begin{verbatim}
+\newfloat{Program}{thp}{lop}[chapter]
+\floatname{Program}{Program Listing}
+\end{verbatim}
+
+and then:
+
+\begin{verbatim}
+\begin{Program}[htb]
+\begin{lstlisting}[style=Matlab-editor,basicstyle=\mlttfamily\footnotesize]
+function [x, fx] = Whatever(f,x0)
+etc
+\end{lstlisting}
+\caption{Some text.}
+\label{some_name}
+\end{Program}
+\end{verbatim}
+
+Your code is to be excellently documented, and demonstrated to work. The PDF file should be a “report”, and a professionally done document that is a pleasure to read.
+
+\medskip
+
+You may work with one or two other persons. You must specify these persons on the front of your document. Their submitted documents obviously contains the dual information.
+
+\end{document}

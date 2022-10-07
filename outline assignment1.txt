@@ -1,0 +1,11 @@
+read stats book:
+- A.16 (theory on stable dist)
+- A.3 (code, note my code invokes function "quadl" in Matlab. This is outdated, so you need to read the help files to determine what routine for numeric integration can be used)
+- A.4 (code, note my code invokes function "quadl" in Matlab. This is outdated, so you need to read the help files to determine what routine for numeric integration can be used)
+- A.6 (code, maybe update seed)
+- A.16 (theory on expected shortfall of the stable dist + code)
+- A.8 (theory on ES, skim it but read especially p. 445 about how to compute the empirical ES from a given data set)
+
+coding
+- For a particular set of stable parameters (alpha, beta, location, scale) such as alpha=1.7, beta=0, location zero and scale one, compute the theoretical ES (based on a tail probability of xi=0.01, but keep your code flexible so xi is a parameter), and also compute it via simulation. That means, you simulate say 10^6 stable variates, and compute the empirical ES. They should be the same up to simulation error. For fun, you can figure out how large the replication number (number of samples) needs to be to ensure getting a certain number of correct significant digits, as compared obviously to the theory values. I presume it would be a function of the tail index parameter alpha, but I am not sure.
+- simulate a set of IID stable Paretian data, and then estimate the model parameters using "stablereg.m" program, i.e., run an already-written black box program (stablereg.m) to estimate the parameters of the stable distribution from a data set; If you simulate a large number of observations, say 10^5 or 10^6, then when you estimate the parameters, you should get back values very close to the true values. This helps confirm that both the method of simulation, and estimation, are working. I suggest you do this.
