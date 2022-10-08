@@ -27,7 +27,7 @@ a = 1.2; b = 0.9; c = 0; d = 1;
 
 % generate random sample of size nobs from the stable dist with the above
 % defined variables
-randstab = stabgen(nobs, a, b, c, d, 42);
+randstab = stabgen(nobs, a, b, d, c, 42);
 
 % plot the sample
 plot(1:1e6, randstab)
@@ -37,7 +37,8 @@ a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
 
 % theoretical ES using Stoyanov et al. (Book p. 490 - 492)
 %ES_stoy = asymstableES(xi, a, b, c, d,1);
-
+%X = ['ES via Stoyanov et al: ', num2str(ES_stoy)]; 
+%disp(X);
 
 
 % Simulation (Book p. 445)
@@ -45,7 +46,9 @@ nobs = 10^6;
 data = stabgen(nobs, a, b, d, c, 0);
 q = quantile(data, xi);
 Plo = data(data < q);
-ES_sim = mean(Plo);
+ES_sim = mean(Plo); 
+X = ['ES via simulation: ', num2str(ES_sim)]; 
+disp(X);
 %Result: -11.2002
 
 %% Question 5
