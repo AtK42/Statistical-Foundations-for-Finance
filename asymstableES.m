@@ -31,8 +31,8 @@ ell = -120; M = ell; display = 0; term1 = K*(-M)^(1-a)/(1-a);
 term3 = integral(@(x) stableCVARint(x, a, b), ell, q);
 tailcomp = term1 + term3;
 
-function [g] = stableCVARint(x, a, b)
-if exist('stableqkpdf.m', 'file'), den = stableqkpdf(x,[a, b], 1);
-else den = asymstab(x, a, b)';
-end
-g = x.*den;
+%function [g] = stableCVARint(x, a, b)
+%if exist('stableqkpdf.m', 'file'), den = stableqkpdf(x,[a, b], 1);
+%else den = asymstab(x, a, b)';
+%end
+%g = x.*den;
