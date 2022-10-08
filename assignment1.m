@@ -2,7 +2,6 @@
 %%% Statistical Foundations for Finance - Homework 1 %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Exercise 1
 %% compute pdf of the stable
 % define a sequence of x-values for which the pdf will be plotted and some
 % different variables for the alpha parameter
