@@ -1,6 +1,6 @@
 function x=stabgen(nobs,a,b,c,d,seed)
 if nargin<3 , b=0; end, if nargin<4 , c=1; end
-if nargin<5 , d=0; end, if nargin<6 , seed=rand; end
+if nargin<5 , d=0; end, if nargin<6 , seed=rand*1000; end
 z=nobs;
 rand('twister', seed), V=unifrnd(-pi/2, pi/2, 1, z);
 rand('twister', seed+42), W=exprnd(1, 1, z);
