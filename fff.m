@@ -9,5 +9,3 @@ for ii=1:length(uvec)
     z=exp(-1i*t*x).*cf; if dopdf==1,g=real(z); else g=imag(z)./t; end
     if subs==1, I(ii)=g*u^(-2); else I(ii)=g*(1-u )^(-2); end
 end
-
-% complete with: scale (c) and location (d) - see fffplus
