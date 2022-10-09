@@ -60,14 +60,11 @@ set(gca, 'fontsize', 10)
 %plot(x,f)
 
 %% Question 2. convolution of two independent stable random variables
+% slide 535/674 in the lecture notes
 a = 1.7; b1 = -0.4; b2 = 1; c1 = 2; c2 = 2; d1 = -0.5; d2 = -0.3;
-
-% by slide 535 in the lecture notes:
-b_conv = (b1 * c1^a + b2 * c2^a)/(c1^a + c2^a); c_conv = (c1^a + c2^a)^(1/a); d_conv = d1 + d2;
+c_conv = (c1^a + c2^a)^(1/a); d_conv = d1 + d2;
 
 
-% %%% true density %%%
-% calculate the actual theoretical values of a S_{a,b} distribution
 
 
 %% Question 4
