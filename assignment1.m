@@ -9,9 +9,9 @@ n = 1e4; xvec = -10:.001:10;
 %%% kernel density estimate %%%
 % generate a random sample of size n from the S_{a,b}(d, c) distribution
 % and plot the resulting density
-randstab = stabgen(n, a, b, c, d, 1);
+randstab = stabgen(n, a, b, c, d, 2);
 [f,x] = ksdensity(randstab);
-plot(x, f, 'r-', 'linewidth', 2)
+plot(x, f, 'r--', 'linewidth', 2)
 
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
@@ -61,14 +61,30 @@ set(gca, 'fontsize', 10)
 
 %% Question 2. convolution of two independent stable random variables
 a = 1.7; b1 = -0.4; b2 = 1; c1 = 2; c2 = 2; d1 = -0.5; d2 = -0.3;
+n = 1e4; xvec = -10:.001:10;
 
 % by slide 535 in the lecture notes:
 b_conv = (b1 * c1^a + b2 * c2^a)/(c1^a + c2^a); c_conv = (c1^a + c2^a)^(1/a); d_conv = d1 + d2;
 
+%%% kernel density estimate %%%
+% generate a random sample of size n from the S_{a,b}(d, c) distribution
+% and plot the resulting density
+randstab_conv = stabgen(n, a, b_conv, c_conv, d_conv, 2);
+[f_conv,x_conv] = ksdensity(randstab_conv);
+plot(x_conv, f_conv, 'r--', 'linewidth', 2)
 
-% %%% true density %%%
+%%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
+theostab = asymstab(xvec, a, b_conv);
+hold on, plot(xvec, theostab, 'b-', 'linewidth', 2), hold off
 
+% prettyfy the plot
+legend('Simulated PDF', ...
+       'Theoretical PDF', 'Location', 'NorthWest')
+title('PDFs For A Convolution of two Stable Distribution r.v.s')
+xlim([-10 10])
+xlabel("x"); ylabel("S(x)")
+set(gca, 'fontsize', 10)
 
 %% Question 4
 a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
