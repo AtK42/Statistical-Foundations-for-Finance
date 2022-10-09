@@ -14,6 +14,7 @@ randstab = stabgen(n, a, b, c, d, 2);
 figure, plot(x, f, 'r--', 'linewidth', 2)
 xlim([-20 20])
 
+
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
 theostab = asymstabplus(xvec, a, b, c, d);
