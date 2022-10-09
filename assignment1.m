@@ -90,7 +90,7 @@ set(gca, 'fontsize', 10)
 a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
 
 % theoretical ES using Stoyanov et al. (Book p. 490 - 492)
-%ES_stoy = asymstableES(xi, a, b, c, d,1);
+[ES_stoy, VaR] = asymstableES(xi, a, b, c, d,1);
 %X = ['ES via Stoyanov et al: ', num2str(ES_stoy)]; 
 %disp(X);
 
@@ -103,6 +103,35 @@ Plo = data(data < q);
 ES_sim = mean(Plo); 
 X = ['ES via simulation: ', num2str(ES_sim)]; 
 disp(X);
-%Result: -11.2002
+%Result: -10.981
 
 %% Question 5
+
+a1 = 1.6; a2 = 1.8; %keep other parameters the same as before
+xi = [0.01 0.025 0.05]; seed = 0; nobs = 1e6;
+
+% Simulate the sum S = X1 + X2 and calculate ES for different values of xi
+
+ES_sum_sim = Simulated_ES(nobs, a1, a2, b, c, d, xi, seed);
+X = ['ES via simulation for different levels: ', num2str(ES_sum_sim)]; 
+disp(X);
+
+% Now using smaller set of simulated values (1e4) we estimate parameters of
+% the stable distribution of the sum.
+nobs = 1e4; X1 = stabgen(nobs, a1, b, d, c, 0); X2 = stabgen(nobs, a2, b, d, c, 0); S = X1 + X2;
+[alpha,beta,sigma,mu] = stablereg(S);
+X = ['Alpha: ', num2str(alpha), ' Beta: ', num2str(beta), ' Sigma: ', num2str(sigma), ' Mu: ', num2str(mu),]; 
+disp(X);
+
+% Now we can use the estimated parameters to calculate the 
+[ES_stoy, VaR] = asymstableES(xi, alpha, beta, mu, sigma ,1);
+X = ['ES via Stoyanov et al: ', num2str(ES_stoy)]; 
+disp(X);
+
+% Now we repeat it with new alphas
+a1 = 1.5; a2 = 1.9; 
+ES_sum_sim = Simulated_ES(nobs, a1, a2, b, c, d, xi, seed);
+X = ['ES via simulation for different levels: ', num2str(ES_sum_sim)]; 
+disp(X);
+
+
