@@ -1,5 +1,5 @@
 % is not working properly yet
-% guess integral is the problem 
+% the problem is getting the quantile via the fzero function on line 10!
 
 function [ES, VaR] = asymstableES (xi, a, b, mu, scale, method)
 if nargin < 3 , b=0; end, if nargin < 4 , mu=0; end
@@ -19,7 +19,7 @@ end
 
 function diff = stabcdfroot(x, xi, a, b)
 if exist('stableqkcdf.m', 'file'), F = stableqkcdf (x, [a, b], 1); % Nolan routine
-else [~, F] = asymstab(x, a, b);
+else [~, F] = asymstab(x, a, b); %get the cdf of the asymmetric stable
 end
 diff = F - xi;
 
