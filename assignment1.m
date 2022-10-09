@@ -4,13 +4,13 @@
 
 %% Question 1. compute pdf of the stable (first line: simulated density, second line: true density)
 a = 1.7; b = -0.4; c = 2; d = 0.3;
-n = 4*1e5; xvec = -20:.0001:20;
+n = 40000; xvec = -20:.001:20;
 
 %%% kernel density estimate %%%
 % generate a random sample of size n from the S_{a,b}(d, c) distribution
 % and plot the resulting density
 randstab = stabgen(n, a, b, c, d, 2);
-[f,x] = ksdensity(randstab);
+[f,x] = ksdensity(randstab, xvec);
 figure, plot(x, f, 'r--', 'linewidth', 2)
 xlim([-20 20])
 
