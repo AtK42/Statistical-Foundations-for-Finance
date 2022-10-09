@@ -4,25 +4,25 @@
 
 %% Question 1. compute pdf of the stable (first line: simulated density, second line: true density)
 a = 1.7; b = -0.4; c = 2; d = 0.3;
-n = 1e4; xvec = -10:.001:10;
+n = 4*1e5; xvec = -20:.0001:20;
 
 %%% kernel density estimate %%%
 % generate a random sample of size n from the S_{a,b}(d, c) distribution
 % and plot the resulting density
 randstab = stabgen(n, a, b, c, d, 2);
 [f,x] = ksdensity(randstab);
-plot(x, f, 'r--', 'linewidth', 2)
+figure, plot(x, f, 'r--', 'linewidth', 2)
+xlim([-20 20])
 
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
-theostab = asymstab(xvec, a, b);
+theostab = asymstabplus(xvec, a, b, c, d);
 hold on, plot(xvec, theostab, 'b-', 'linewidth', 2), hold off
 
 % prettyfy the plot
 legend('Simulated PDF', ...
        'Theoretical PDF', 'Location', 'NorthWest')
 title('PDFs For Stable Distribution')
-xlim([-10 10])
 xlabel("x"); ylabel("S_{1.7, -0.4}(2, 0.3)(x)")
 set(gca, 'fontsize', 10)
 
@@ -61,7 +61,7 @@ set(gca, 'fontsize', 10)
 
 %% Question 2. convolution of two independent stable random variables
 a = 1.7; b1 = -0.4; b2 = 1; c1 = 2; c2 = 2; d1 = -0.5; d2 = -0.3;
-n = 1e4; xvec = -10:.001:10;
+n = 1e5; xvec = -20:.001:20;
 
 % by slide 535 in the lecture notes:
 b_conv = (b1 * c1^a + b2 * c2^a)/(c1^a + c2^a); c_conv = (c1^a + c2^a)^(1/a); d_conv = d1 + d2;
@@ -75,14 +75,14 @@ plot(x_conv, f_conv, 'r--', 'linewidth', 2)
 
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
-theostab = asymstab(xvec, a, b_conv);
+theostab = asymstabplus(xvec, a, b_conv);
 hold on, plot(xvec, theostab, 'b-', 'linewidth', 2), hold off
 
 % prettyfy the plot
 legend('Simulated PDF', ...
        'Theoretical PDF', 'Location', 'NorthWest')
 title('PDFs For A Convolution of two Stable Distribution r.v.s')
-xlim([-10 10])
+xlim([-20 20])
 xlabel("x"); ylabel("S(x)")
 set(gca, 'fontsize', 10)
 
