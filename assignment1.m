@@ -128,6 +128,7 @@ randstab_conv_s = randstab_conv_a1 + randstab_conv_a2;
 [f_conv_a,x_conv_a] = ksdensity(randstab_conv_s,xvec);
 plot(x_conv_a, f_conv_a, 'r--', 'linewidth', 2)
  
+%
  
 % Obviously, lavishly annotate your graphic with titles, x and y labels,
 % a legend, make the x and y numbers on the axis be big enough (use in
