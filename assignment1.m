@@ -104,7 +104,7 @@ set(gca, 'fontsize', 10)
 % scale=c=c1=c2=1 
 % location=d=d1=d2=0
 a1 = 1.6; a2 = 1.8; b = 0; c = 1; d = 0;
-n = 1e5; xvec = -20:.001:20;
+n = 400; xvec = -20:.1:20;
 
 % now there are three different ways of computing the pdf for the
 % convolution
@@ -122,6 +122,9 @@ n = 1e5; xvec = -20:.001:20;
 % the characteristic function of the sum of X1 and X2, which is, remember,
 % the product of the two characteristic functions. Do it, plot it. Overlay
 % the two lines. They should be nearly identical.
+theostab_conv_ex3_2 = asymstabplus_ex3_2(xcec, a1, a2);
+
+hold on, plot(xvec, theostab_conv_ex3_2, 'b-', 'linewidth', 2), hold off
 
 % #3 Add a third line to your graphic, based on simulation and kernel 
 % density.
