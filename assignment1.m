@@ -162,7 +162,7 @@ set(gca, 'fontsize', 10)
 a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
 
 % theoretical ES using Stoyanov et al. (Book p. 490 - 492)
-[ES_stoy, VaR] = asymstableES(xi, a, b, c, d,1);
+%[ES_stoy, VaR] = asymstableES(xi, a, b, c, d,1);
 %X = ['ES via Stoyanov et al: ', num2str(ES_stoy)]; 
 %disp(X);
 
@@ -175,7 +175,7 @@ Plo = data(data < q);
 ES_sim = mean(Plo); 
 X = ['ES via simulation: ', num2str(ES_sim)]; 
 disp(X);
-%Result: -10.981
+%Result: -11.2002
 
 %% Question 5
 
