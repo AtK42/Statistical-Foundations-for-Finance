@@ -20,9 +20,14 @@ xlim([-20 20])
 theostab = asymstabplus(xvec, a, b, c, d);
 hold on, plot(xvec, theostab, 'b-', 'linewidth', 2), hold off
 
+pdfmatlab = makedist("Stable","alpha",a,"beta",b,"gam",c,"delta",d);
+theostab1 = pdf(pdfmatlab, xvec);
+hold on, plot(xvec, theostab1, 'c-', 'linewidth', 2), hold off
+
 % prettyfy the plot
 legend('Simulated PDF', ...
-       'Theoretical PDF', 'Location', 'NorthWest')
+       'Theoretical PDF', ...
+       'Theoretical PDF with Matlab', 'Location', 'NorthWest')
 title('PDFs For Stable Distribution')
 xlabel("x"); ylabel("S_{1.7, -0.4}(2, 0.3)(x)")
 set(gca, 'fontsize', 10)
