@@ -78,14 +78,11 @@ b_conv = (b1 * c1^a + b2 * c2^a)/(c1^a + c2^a); c_conv = (c1^a + c2^a)^(1/a); d_
 % generate a random sample of size n from the S_{a,b}(d, c) distribution
 % and plot the resulting density
 randstab_conv = stabgen(n, a, b_conv, c_conv, d_conv, 2);
-<<<<<<< HEAD
 [f_conv,x_conv] = ksdensity(randstab_conv, xvec);
 figure, plot(x_conv, f_conv, 'r--', 'linewidth', 3)
 xlim([-20 20])
-=======
 [f_conv,x_conv] = ksdensity(randstab_conv,xvec);
 plot(x_conv, f_conv, 'r--', 'linewidth', 2)
->>>>>>> bd789c8f86fe9bd784cedc23bd3c1a4db1fad4cb
 
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
