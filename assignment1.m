@@ -28,6 +28,8 @@ hold on, plot(xvec, theostab, 'b-', 'linewidth', 3), hold off
 legend('Simulated PDF', ...
        'Theoretical PDF', ...
        'Location', 'NorthWest');
+       'Theoretical PDF', 'Location', 'NorthWest')
+       %'Theoretical PDF with Matlab', ...
 title('PDFs For Stable Distribution')
 xlabel("x"); ylabel("S_{1.7, -0.4}(2, 0.3)(x)")
 set(gca, 'fontsize', 10)
@@ -85,6 +87,9 @@ xlim([-20 20])
 theostab_conv = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
 hold on, plot(xvec, theostab_conv, 'b-', 'linewidth', 2), hold off
 
+theostab = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
+hold on, plot(xvec, theostab, 'b-', 'linewidth', 2), hold off
+
 % prettyfy the plot
 legend('Simulated PDF', ...
        'Theoretical PDF', 'Location', 'NorthWest')
@@ -92,14 +97,69 @@ title('PDFs For A Convolution of two Stable Distribution r.v.s')
 xlabel("x"); ylabel("S(x)")
 set(gca, 'fontsize', 10)
 
-%% Question 3
-a1 = 1.6; a2 = 1.8; b = 0; c = 0; d = 1;
+%% Question 3. convolution of two independent stable random variables with different tail index alpha
+% alpha is given as alpha1 = a1 = 1.6 and alpha2 = a2 = 1.8
+% beta, scale and location are the same for both, i.e.
+% beta=b=b1=b2=0 
+% scale=c=c1=c2=1 
+% location=d=d1=d2=0
+a1 = 1.6; a2 = 1.8; b = 0; c = 1; d = 0;
+n = 1e5; xvec = -20:.001:20;
 
-% 3.1: by convolution formula
+% now there are three different ways of computing the pdf for the
+% convolution
 
-% 3.2: by inversion formula
+% #1 Simple integration formula called the convolution formula, that I 
+% showed you in class, along with formulae for difference, product, and
+% quotient, remember? You program the integral convolution formula 
+% (obviously, you need to be able to execute numeric integration), and 
+% generate a plot of the resulting density (over, say, 400 points, or 
+% however many you can do, i.e., maybe it takes too long, and you only do
+% 100 points --- be smart, and understand what we are doing here.)
 
-% 3.3: kernel density estimate
+
+% #2 Next, you compute the pdf by using the inversion formula applied to 
+% the characteristic function of the sum of X1 and X2, which is, remember,
+% the product of the two characteristic functions. Do it, plot it. Overlay
+% the two lines. They should be nearly identical.
+
+% #3 Add a third line to your graphic, based on simulation and kernel 
+% density.
+% 
+% 
+% 
+% 
+% 
+% Obviously, lavishly annotate your graphic with titles, x and y labels,
+% a legend, make the x and y numbers on the axis be big enough (use in
+% Matlab set(gca,'fontsize',16)), etc. Use nice clear colors for each of
+% the 3 lines of your graphic, say red, green, blue, or whatever you like
+% (yellow is usually a bad choice), and also:
+
+
+
+% by slide 535 in the lecture notes:
+b_conv = (b1 * c1^a + b2 * c2^a)/(c1^a + c2^a); c_conv = (c1^a + c2^a)^(1/a); d_conv = d1 + d2;
+
+%%% kernel density estimate %%%
+% generate a random sample of size n from the S_{a,b}(d, c) distribution
+% and plot the resulting density
+randstab_conv = stabgen(n, a, b_conv, c_conv, d_conv, 2);
+[f_conv,x_conv] = ksdensity(randstab_conv);
+plot(x_conv, f_conv, 'r--', 'linewidth', 2)
+
+%%% true density %%%
+% calculate the actual theoretical values of a S_{a,b} distribution
+theostab = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
+hold on, plot(xvec, theostab, 'b-', 'linewidth', 2), hold off
+
+% prettyfy the plot
+legend('Simulated PDF', ...
+       'Theoretical PDF', 'Location', 'NorthWest')
+title('PDFs For A Convolution of two Stable Distribution r.v.s')
+xlim([-20 20])
+xlabel("x"); ylabel("S(x)")
+set(gca, 'fontsize', 10)
 
 %% Question 4
 a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
