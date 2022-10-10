@@ -78,9 +78,14 @@ b_conv = (b1 * c1^a + b2 * c2^a)/(c1^a + c2^a); c_conv = (c1^a + c2^a)^(1/a); d_
 % generate a random sample of size n from the S_{a,b}(d, c) distribution
 % and plot the resulting density
 randstab_conv = stabgen(n, a, b_conv, c_conv, d_conv, 2);
+<<<<<<< HEAD
 [f_conv,x_conv] = ksdensity(randstab_conv, xvec);
 figure, plot(x_conv, f_conv, 'r--', 'linewidth', 3)
 xlim([-20 20])
+=======
+[f_conv,x_conv] = ksdensity(randstab_conv,xvec);
+plot(x_conv, f_conv, 'r--', 'linewidth', 2)
+>>>>>>> bd789c8f86fe9bd784cedc23bd3c1a4db1fad4cb
 
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
@@ -128,47 +133,33 @@ hold on, plot(xvec, theostab_conv_ex3_2, 'b-', 'linewidth', 2), hold off
 
 % #3 Add a third line to your graphic, based on simulation and kernel 
 % density.
-% 
-% 
-% 
-% 
-% 
+ 
+randstab_conv_a1 = stabgen(n, a1, b, c, d, 2);
+randstab_conv_a2 = stabgen(n, a2, b, c, d, 2);
+randstab_conv_s = randstab_conv_a1 + randstab_conv_a2;
+[f_conv_a,x_conv_a] = ksdensity(randstab_conv_s,xvec);
+plot(x_conv_a, f_conv_a, 'r--', 'linewidth', 2)
+ 
+%
+ 
 % Obviously, lavishly annotate your graphic with titles, x and y labels,
 % a legend, make the x and y numbers on the axis be big enough (use in
 % Matlab set(gca,'fontsize',16)), etc. Use nice clear colors for each of
 % the 3 lines of your graphic, say red, green, blue, or whatever you like
 % (yellow is usually a bad choice), and also:
 
-
-
-% by slide 535 in the lecture notes:
-b_conv = (b1 * c1^a + b2 * c2^a)/(c1^a + c2^a); c_conv = (c1^a + c2^a)^(1/a); d_conv = d1 + d2;
-
-%%% kernel density estimate %%%
-% generate a random sample of size n from the S_{a,b}(d, c) distribution
-% and plot the resulting density
-randstab_conv = stabgen(n, a, b_conv, c_conv, d_conv, 2);
-[f_conv,x_conv] = ksdensity(randstab_conv);
-plot(x_conv, f_conv, 'r--', 'linewidth', 2)
-
-%%% true density %%%
-% calculate the actual theoretical values of a S_{a,b} distribution
-theostab = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
-hold on, plot(xvec, theostab, 'b-', 'linewidth', 2), hold off
-
-% prettyfy the plot
-legend('Simulated PDF', ...
-       'Theoretical PDF', 'Location', 'NorthWest')
-title('PDFs For A Convolution of two Stable Distribution r.v.s')
-xlim([-20 20])
-xlabel("x"); ylabel("S(x)")
-set(gca, 'fontsize', 10)
+%legend('Simulated PDF', ...
+%       'Theoretical PDF', 'Location', 'NorthWest')
+%title('PDFs For A Convolution of two Stable Distribution r.v.s')
+%xlim([-20 20])
+%xlabel("x"); ylabel("S(x)")
+%set(gca, 'fontsize', 10)
 
 %% Question 4
 a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
 
 % theoretical ES using Stoyanov et al. (Book p. 490 - 492)
-[ES_stoy, VaR] = asymstableES(xi, a, b, c, d,1);
+%[ES_stoy, VaR] = asymstableES(xi, a, b, c, d,1);
 %X = ['ES via Stoyanov et al: ', num2str(ES_stoy)]; 
 %disp(X);
 
@@ -181,7 +172,7 @@ Plo = data(data < q);
 ES_sim = mean(Plo); 
 X = ['ES via simulation: ', num2str(ES_sim)]; 
 disp(X);
-%Result: -10.981
+%Result: -11.2002
 
 %% Question 5
 
