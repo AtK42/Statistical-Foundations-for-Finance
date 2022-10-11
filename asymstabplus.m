@@ -8,7 +8,7 @@ xl=length(xvec ); F=zeros(xl ,1 ); f=F;
 for loop=1:length(xvec )
     %x=(xvec(loop)-d)/c;
     x=xvec(loop);
-    f(loop)=(integral(@(uvec) fffplus(uvec,x,a,b,c,d,1), lo, hi)/pi)/c;
+    %f(loop)=(integral(@(uvec) fffplus(uvec,x,a,b,c,d,1), lo, hi)/pi)/c;
     f(loop)=integral(@(uvec) fffplus(uvec,x,a,b,c,d,1), lo, hi)/pi;
     if nargout>1
         F(loop)=0.5-(1/pi)*integral(@(uvec) fffplus(uvec,x,a,b,c,d,0), lo, hi)/pi;
