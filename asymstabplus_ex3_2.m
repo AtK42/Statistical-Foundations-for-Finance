@@ -8,5 +8,5 @@ for loop=1:length(xvec )
     %x=(xvec(loop)-d)/c;
     x=xvec(loop);
     f(loop)=(integral(@(uvec) fffplus_ex3_2(uvec, x, a1, a2, 1), lo, hi)/pi);
-    f(loop)=integral(@(uvec) fffplus_ex3_2(uvec, x, a1, a2, 1), lo, hi)/pi;
+    %f(loop)=integral(@(uvec) fffplus_ex3_2(uvec, x, a1, a2, 1), lo, hi)/pi;
 end
