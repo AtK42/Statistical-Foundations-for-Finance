@@ -72,7 +72,9 @@ saveas(gca, 'assignment1_ex2.png')
 % scale=c=c1=c2=1 
 % location=d=d1=d2=0
 a1 = 1.6; a2 = 1.8; b = 0; c = 1; d = 0;
-n = 4*1e4; xvec = -20:.0001:20;
+n = 4*1e4; xvec = -10:.05:10;
+svec=-10:0.05:10;
+
 
 % now there are three different ways of computing the pdf for the
 % convolution
@@ -84,10 +86,12 @@ n = 4*1e4; xvec = -20:.0001:20;
 % generate a plot of the resulting density (over, say, 400 points, or 
 % however many you can do, i.e., maybe it takes too long, and you only do
 % 100 points --- be smart, and understand what we are doing here.)
+f = convopdf(svec,a1,a2);
+figure, plot(svec, f, 'linewidth', 3)
 
 %see slide "Asymmetric Stable: P.D.F. Calculation" (s. 553)
-figure, plot(-20:20, repelem(0, 41), 'g-', 'linewidth', 3) %place holder
-xlim([-20 20])
+%figure, plot(-20:20, repelem(0, 41), 'g-', 'linewidth', 3) %place holder
+%xlim([-20 20])
 
 % #2 Next, you compute the pdf by using the inversion formula applied to 
 % the characteristic function of the sum of X1 and X2, which is, remember,
@@ -98,10 +102,11 @@ hold on, plot(xvec, theostab_conv_ex3_2, 'b-', 'linewidth', 3), hold off
 
 % #3 Add a third line to your graphic, based on simulation and kernel 
 % density.
-randstab_conv_a1 = stabgen(n, a1, b, c, d, 2);
-randstab_conv_a2 = stabgen(n, a2, b, c, d, 2);
+b=0;c=1;d=0;n=10000;
+randstab_conv_a1 = stabgen(n, a1, b, c, d, 5);
+randstab_conv_a2 = stabgen(n, a2, b, c, d, 7585);
 randstab_conv_s = randstab_conv_a1 + randstab_conv_a2;
-[f_conv_a, x_conv_a] = ksdensity(randstab_conv_s,xvec);
+[f_conv_a, x_conv_a] = ksdensity(randstab_conv_s,svec);
 hold on, plot(x_conv_a, f_conv_a, 'r--', 'linewidth', 3), hold off
  
 % Obviously, lavishly annotate your graphic with titles, x and y labels,
