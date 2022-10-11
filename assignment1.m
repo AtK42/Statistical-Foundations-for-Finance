@@ -11,9 +11,8 @@ n = 40000; xvec = -20:.001:20;
 % and plot the resulting density
 randstab = stabgen(n, a, b, c, d, 2);
 [f,x] = ksdensity(randstab, xvec);
-figure, plot(x, f, 'r--', 'linewidth', 2)
+figure, plot(x, f, 'r--', 'linewidth', 3)
 xlim([-20 20])
-
 
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
@@ -31,6 +30,7 @@ legend('Simulated PDF', ...
 title('PDFs For Stable Distribution')
 xlabel("x"); ylabel("S_{1.7, -0.4}(2, 0.3)(x)")
 set(gca, 'fontsize', 10)
+%saveas(gcf, 'assignment1_ex1.png')
 
 %% Question 2. convolution of two independent stable random variables
 a = 1.7; b1 = -0.4; b2 = 1; c1 = 2; c2 = 1; d1 = -0.5; d2 = -0.3;
@@ -63,6 +63,7 @@ legend('Simulated PDF', ...
 title('PDF For A Convolution of two Stable Distribution r.v.s')
 xlabel("x"); ylabel("S(x)")
 set(gca, 'fontsize', 10)
+%saveas(gca, 'assignment1_ex2.png')
 
 %% Question 3. convolution of two independent stable random variables with different tail index alpha
 % alpha is given as alpha1 = a1 = 1.6 and alpha2 = a2 = 1.8
@@ -71,7 +72,7 @@ set(gca, 'fontsize', 10)
 % scale=c=c1=c2=1 
 % location=d=d1=d2=0
 a1 = 1.6; a2 = 1.8; b = 0; c = 1; d = 0;
-n = 400; xvec = -20:.1:20;
+n = 4000; xvec = -20:.01:20;
 
 % now there are three different ways of computing the pdf for the
 % convolution
@@ -83,7 +84,7 @@ n = 400; xvec = -20:.1:20;
 % generate a plot of the resulting density (over, say, 400 points, or 
 % however many you can do, i.e., maybe it takes too long, and you only do
 % 100 points --- be smart, and understand what we are doing here.)
-plot(-20:20, 0) %place holder
+figure, plot(-20:20, repelem(0, 41), 'g-', 'linewidth', 2) %place holder
 xlim([-20 20])
 
 % #2 Next, you compute the pdf by using the inversion formula applied to 
@@ -95,11 +96,10 @@ hold on, plot(xvec, theostab_conv_ex3_2, 'b-', 'linewidth', 2), hold off
 
 % #3 Add a third line to your graphic, based on simulation and kernel 
 % density.
- 
 randstab_conv_a1 = stabgen(n, a1, b, c, d, 2);
 randstab_conv_a2 = stabgen(n, a2, b, c, d, 2);
 randstab_conv_s = randstab_conv_a1 + randstab_conv_a2;
-[f_conv_a,x_conv_a] = ksdensity(randstab_conv_s,xvec);
+[f_conv_a, x_conv_a] = ksdensity(randstab_conv_s,xvec);
 hold on, plot(x_conv_a, f_conv_a, 'r--', 'linewidth', 2), hold off
  
 % Obviously, lavishly annotate your graphic with titles, x and y labels,
@@ -108,12 +108,14 @@ hold on, plot(x_conv_a, f_conv_a, 'r--', 'linewidth', 2), hold off
 % the 3 lines of your graphic, say red, green, blue, or whatever you like
 % (yellow is usually a bad choice), and also:
 
-legend('Simulated PDF', ...
-       'Theoretical PDF', ...
+legend('PDF by convolution formula', ...
+       'PDF by inversion formula', ...
+       'PDF by simulation', ...
        'Location', 'NorthWest')
 title('PDF For A Convolution of two Stable Distribution r.v.s with different \alpha')
 xlabel("x"); ylabel("S(x)")
 set(gca, 'fontsize', 10)
+%saveas(gca, 'assignment1_ex3.png'
 
 %% Question 4
 a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
