@@ -11,13 +11,13 @@ n = 40000; xvec = -20:.001:20;
 % and plot the resulting density
 randstab = stabgen(n, a, b, c, d, 2);
 [f,x] = ksdensity(randstab, xvec);
-figure, plot(x, f, 'r--', 'linewidth', 3)
+figure, plot(x, f, 'g-', 'linewidth', 3)
 xlim([-20 20])
 
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a,b} distribution
 theostab = asymstabplus(xvec, a, b, c, d);
-hold on, plot(xvec, theostab, 'b-', 'linewidth', 3), hold off
+hold on, plot(xvec, theostab, 'b--', 'linewidth', 3), hold off
 
 %pdfmatlab = makedist("Stable","alpha",a,"beta",b,"gam",c,"delta",d);
 %theostab1 = pdf(pdfmatlab, xvec);
@@ -40,22 +40,22 @@ n = 40000; xvec = -20:.001:20;
 b_conv = (b1 * c1^a + b2 * c2^a)/(c1^a + c2^a); c_conv = (c1^a + c2^a)^(1/a); d_conv = d1 + d2;
 
 %%% kernel density estimate %%%
-% generate a random sample of size n from the S_{a,b}(d, c) distribution
+% generate a random sample of size n from the S_{a, b}(d, c) distribution
 % and plot the resulting density
 randstab_conv = stabgen(n, a, b_conv, c_conv, d_conv, 2);
 [f_conv,x_conv] = ksdensity(randstab_conv, xvec);
-figure, plot(x_conv, f_conv, 'r--', 'linewidth', 3)
+figure, plot(x_conv, f_conv, 'g-', 'linewidth', 3)
 xlim([-20 20])
 [f_conv,x_conv] = ksdensity(randstab_conv,xvec);
-plot(x_conv, f_conv, 'r--', 'linewidth', 2)
+plot(x_conv, f_conv, 'g-', 'linewidth', 2)
 
 %%% true density %%%
-% calculate the actual theoretical values of a S_{a,b} distribution
+% calculate the actual theoretical values of a S_{a, b}(c, d) distribution
 theostab_conv = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
-hold on, plot(xvec, theostab_conv, 'b-', 'linewidth', 2), hold off
+hold on, plot(xvec, theostab_conv, 'b--', 'linewidth', 2), hold off
 
 theostab = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
-hold on, plot(xvec, theostab, 'b-', 'linewidth', 2), hold off
+hold on, plot(xvec, theostab, 'b--', 'linewidth', 2), hold off
 
 % prettyfy the plot
 legend('Simulated PDF', ...
