@@ -26,7 +26,7 @@ hold on, plot(xvec, theostab, 'b--', 'linewidth', 3), hold off
 % prettyfy the plot
 legend('Simulated PDF', ...
        'Theoretical PDF', ...
-       'Location', 'NorthWest');
+       'Location', 'southoutside', 'Orientation', 'vertical', 'Box', 'off');
 title('PDFs For Stable Distribution')
 xlabel("x"); ylabel("S_{1.7, -0.4}(2, 0.3)(x)")
 set(gca, 'fontsize', 10)
@@ -46,20 +46,19 @@ randstab_conv = stabgen(n, a, b_conv, c_conv, d_conv, 2);
 [f_conv,x_conv] = ksdensity(randstab_conv, xvec);
 figure, plot(x_conv, f_conv, 'g-', 'linewidth', 3)
 xlim([-20 20])
-[f_conv,x_conv] = ksdensity(randstab_conv,xvec);
-plot(x_conv, f_conv, 'g-', 'linewidth', 2)
+%[f_conv,x_conv] = ksdensity(randstab_conv,xvec);
+%plot(x_conv, f_conv, 'g-', 'linewidth', 2)
 
 %%% true density %%%
 % calculate the actual theoretical values of a S_{a, b}(c, d) distribution
 theostab_conv = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
 hold on, plot(xvec, theostab_conv, 'b--', 'linewidth', 2), hold off
-
-theostab = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
-hold on, plot(xvec, theostab, 'b--', 'linewidth', 2), hold off
+%theostab = asymstabplus(xvec, a, b_conv, c_conv, d_conv);
+%hold on, plot(xvec, theostab, 'b--', 'linewidth', 2), hold off
 
 % prettyfy the plot
 legend('Simulated PDF', ...
-       'Theoretical PDF', 'Location', 'NorthWest')
+       'Theoretical PDF', 'Location', 'NorthWest', 'Orientation', 'vertical', 'Box', 'off')
 title('PDF For A Convolution of two Stable Distribution r.v.s')
 xlabel("x"); ylabel("S(x)")
 set(gca, 'fontsize', 10)
@@ -71,10 +70,11 @@ saveas(gca, 'assignment1_ex2.png')
 % beta=b=b1=b2=0 
 % scale=c=c1=c2=1
 % location=d=d1=d2=0
-a1 = 1.5; a2 = 1.9; b = 0; c = 1; d = 0;
+a1 = 1.6; a2 = 1.8;
+a1 = 1.5; a2 = 1.9;
+b = 0; c = 1; d = 0;
 n = 4*1e2; xvec = -10:0.05:10;
 svec=-10:0.05:10;
-
 
 % now there are three different ways of computing the pdf for the
 % convolution
@@ -88,7 +88,6 @@ svec=-10:0.05:10;
 % 100 points --- be smart, and understand what we are doing here.)
 f = convopdf(svec,a1,a2);
 figure, plot(svec, f, 'g-', 'linewidth', 3)
-
 %see slide "Asymmetric Stable: P.D.F. Calculation" (s. 553)
 
 % #2 Next, you compute the pdf by using the inversion formula applied to 
@@ -113,14 +112,39 @@ hold on, plot(x_conv_a, f_conv_a, 'r:', 'linewidth', 3), hold off
 % the 3 lines of your graphic, say red, green, blue, or whatever you like
 % (yellow is usually a bad choice), and also:
 
+
+% #4 So, for question 3, please now do FOUR methods. 
+% All 3 we have already in the assignment, plus using the "conv" function in Matlab. 
+% Note that using conv is massively faster than my old-school way of doing things, 
+% so it will run super fast, and should deliver very accurate results. 
+% I realize that my old-school way based literally on the integral convolution formula is slow, 
+% and part of the reason is that it is using a generic numeric integration routine and 
+% requires calling your codes for the evaluation of the stable density, which is slow. 
+% Doing it with the "conv" function will be faster because it is a simple explicit form of numeric integration,
+% and also you pass it simply two long vectors of pdf values.
+% Your job is to figure out how to use the function and make it work. Notice this is a very powerful and useful tool to know about!
+
+xvec = -10:.01:10;
+
+% generate pdfs
+s1 = asymstab_generalized(xvec, a1, b, c, d);
+s2 = asymstab_generalized(xvec, a2, b, c, d);
+
+% calculate the convolution
+sconv = conv(s1, s2, 'same')/10;
+
+% plot
+hold on, plot(xvec', sconv, 'k:', 'LineWidth', 3), holf off
+%&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 legend('PDF by convolution formula', ...
        'PDF by inversion formula', ...
        'PDF by simulation', ...
+       'PDF by Matlab convolution formula', ...
        'Location', 'southoutside', 'Orientation', 'vertical', 'Box', 'off')
 title('PDF For A Convolution of two Stable Distribution r.v.s with different \alpha')
 xlabel("x"); ylabel("S(x)")
 set(gca, 'fontsize', 10)
-saveas(gca, 'assignment1_ex3_2.png')
+%saveas(gca, 'assignment1_ex3_2.png')
 
 %% Question 4
 a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
@@ -155,12 +179,12 @@ disp(X);
 % Now using smaller set of simulated values (1e4) we estimate parameters of
 % the stable distribution of the sum.
 nobs = 1e4; X1 = stabgen(nobs, a1, b, d, c, 0); X2 = stabgen(nobs, a2, b, d, c, 0); S = X1 + X2;
-[alpha,beta,sigma,mu] = stablereg(S);
-X = ['Alpha: ', num2str(alpha), ' Beta: ', num2str(beta), ' Sigma: ', num2str(sigma), ' Mu: ', num2str(mu),]; 
+[alpha,b,sigma,mu] = stablereg(S);
+X = ['Alpha: ', num2str(alpha), ' Beta: ', num2str(b), ' Sigma: ', num2str(sigma), ' Mu: ', num2str(mu),]; 
 disp(X);
 
 % Now we can use the estimated parameters to calculate the 
-[ES_stoy, VaR] = asymstableES(xi, alpha, beta, mu, sigma ,1);
+[ES_stoy, VaR] = asymstableES(xi, alpha, b, mu, sigma ,1);
 X = ['ES via Stoyanov et al: ', num2str(ES_stoy)]; 
 disp(X);
 
