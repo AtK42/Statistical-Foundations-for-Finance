@@ -55,7 +55,7 @@ hold on, plot(xvec, theostab_conv, 'b--', 'linewidth', 2), hold off
 
 % prettyfy the plot by adding a legend, title, labels, etc
 legend('Simulated PDF', ...
-       'Theoretical PDF', 'Location', 'NorthWest', 'Orientation', 'vertical', 'Box', 'off')
+       'Theoretical PDF', 'Location', 'southoutside', 'Orientation', 'vertical', 'Box', 'off')
 title('PDF For A Convolution of two Stable Distribution r.v.s')
 xlabel("x"); ylabel("f(x)")
 set(gca, 'fontsize', 10)
@@ -77,6 +77,7 @@ n = 4*1e2; xvec = -10:0.05:10; svec=-10:0.05:10;
 f = convopdf(svec,a1,a2);
 figure, plot(svec, f, 'g-', 'linewidth', 3)
 xlim([-9.5 9.5])
+
 
 %%% by the inversion formula applied to the characteristic function %%%
 theostab_conv_ex3_2 = asymstabplus_ex3_2(xvec, a1, a2);
@@ -128,29 +129,31 @@ else
 end
 
 
-%% Question 3. convolution of THREE independent stable random variables with different tail index alpha
+%% Question 3(.2). convolution of THREE independent stable random variables with identical tail index alpha
 
-a1 = 1.6; a2 = 1.8; a3 = 1.9;
-b = 0; c = 1; d = 0;
+a = 1.9; b1 = 0; b2 = -0.5; b3 = 0.4; c1 = 1; c2 = 1.5; c3 = 2; d1 = 0; d2 = -1; d3 = 1;
 xvec = -16:.01:16; n=1e6; svec=-16:0.05:16;
 
+% calculate the parameters of the stable r.v. that is given by the sum of two stable r.v.s
+% (slide 535 in the lecture notes)
+b_conv = (b1 * c1^a + b2 * c2^a + b3 * c3^a)/(c1^a + c2^a + c3^a);
+c_conv = (c1^a + c2^a + c3^a)^(1/a);
+d_conv = d1 + d2 + d3;
+
+
 %%% kernel density estimate %%%
-randstab_conv_a1 = stabgen(n, a1, b, c, d, 5);
-randstab_conv_a2 = stabgen(n, a2, b, c, d, 7585);
-randstab_conv_a3 = stabgen(n, a3, b, c, d, 125);
-% add (convolute) the three random samples
-randstab_conv_s = randstab_conv_a1 + randstab_conv_a2 + randstab_conv_a3;
+randstab_conv_s = stabgen(n, a, b_conv, c_conv, d_conv, 5);
 % apply the kernel density smoother in order to be able to plot the density
-[f_conv_a, x_conv_a] = ksdensity(randstab_conv_s,svec);
+[f_conv_a, x_conv_a] = ksdensity(randstab_conv_s, svec);
 figure, plot(x_conv_a, f_conv_a, 'g-', 'linewidth', 3)
 xlim([-15 15])
 
 %%% using the "conv" function in Matlab %%%
 
 % generate pdfs for the three alphas
-s1 = asymstab_generalized(xvec, a1, b, c, d);
-s2 = asymstab_generalized(xvec, a2, b, c, d);
-s3 = asymstab_generalized(xvec, a3, b, c, d);
+s1 = asymstab_generalized(xvec, a, b1, c1, d1);
+s2 = asymstab_generalized(xvec, a, b2, c2, d2);
+s3 = asymstab_generalized(xvec, a, b3, c3, d3);
 
 % calculate the convolution
 sconv = conv(s3, conv(s1, s2, 'same')/100, 'same')/100;
@@ -162,7 +165,7 @@ hold on, plot(xvec', sconv, 'b--', 'LineWidth', 3), hold off
 legend('PDF by simulation', ...
        'PDF by Matlab convolution formula', ...
        'Location', 'southoutside', 'Orientation', 'vertical', 'Box', 'off')
-title('PDF For A Convolution of three Stable Distribution r.v.s with different \alpha')
+title('PDF For A Convolution of three Stable Distribution r.v.s with the same \alpha')
 xlabel("x"); ylabel("f(x)")
 set(gca, 'fontsize', 10)
 
