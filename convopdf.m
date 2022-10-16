@@ -1,6 +1,4 @@
-%testfile 3.1
 function f = convopdf(svec, a1, a2)
-
 xl=length(svec); f=zeros(xl, 1);
 for loop=1:length(svec)
     s=svec(loop);

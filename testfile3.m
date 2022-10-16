@@ -1,6 +1,6 @@
 %testfile 3.1
 a1=1.6;a2=1.8;
-svec=-10:0.05:10;
+svec=-10:1:10;
 f = convopdf(svec,a1,a2);
 figure, plot(svec, f, 'linewidth', 3)
 
