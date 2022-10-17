@@ -172,52 +172,93 @@ set(gca, 'fontsize', 10)
 % save plot as .png file
 saveas(gca, 'assignment1_ex3_3rvs.png')
 
-
 %% Question 4
-a = 1.7; b = 0; c = 0; d = 1; xi = 0.01;
+a = 1.7; b = 0; c = 1; d = 0; xi = 0.01;
 
 % theoretical ES using Stoyanov et al. (Book p. 490 - 492)
-[ES_stoy, VaR] = asymstableES(xi, a, b, c, d,1);
+ES_stoy = asymstableES(xi, a, b, d, c, 1);
 X = ['ES via Stoyanov et al: ', num2str(ES_stoy)]; 
 disp(X);
 
 % Simulation (Book p. 445)
 nobs = 10^6;
-data = stabgen(nobs, a, b, d, c, 0);
-q = quantile(data, xi);
-Plo = data(data < q);
-ES_sim = mean(Plo); 
+ES_sim = Simulated_ES(nobs, a, b, c, d, xi, 0);
 X = ['ES via simulation: ', num2str(ES_sim)]; 
 disp(X);
-%Result: -11.2002
+% Result: -11.2002 with nobs = 10^6
+
+% Evolution of ES 
+% Loop over different observation sizes and compute the ES for each nobs
+All_data = stabgen(10^9, a,b,c,d,0);
+nobs = 10:1000:10^8;
+ES_evolution = [];
+for i=1:1000
+    data = All_data(1:nobs(i));
+    q = quantile(data, xi);
+    Plo = data(data < q);
+    ES_evolution(i) = mean(Plo);
+end
+nobs = 100000000:20000000:1000000000;
+ES_evolution_2 = [];
+for i=1:36
+    data = All_data(1:nobs(i));
+    q = quantile(data, xi);
+    Plo = data(data < q);
+    ES_evolution_2(i) = mean(Plo);
+end
+
+ES_total = [ES_evolution, ES_evolution_2];
+nobs_total = [10:400000:10^8, 100000000:20000000:1000000000];
+plot(nobs, ES_diff, 'linewidth', 2);
+yline(ES_stoy, 'Linestyle', '--', 'Color', 'r', 'linewidth', 2);
+xlabel('Number of Observations')
+ylabel('Expected Shortfall')
+ylim(-11.8, -11.1);
+legend('ES via Simulation', 'location', 'NorthEast')
 
 %% Question 5
-
 a1 = 1.6; a2 = 1.8; %keep other parameters the same as before
-xi = [0.01 0.025 0.05]; seed = 0; nobs = 1e6;
+xi = [0.01 0.025 0.05]; seed = 1; nobs = 1e6;
 
 % Simulate the sum S = X1 + X2 and calculate ES for different values of xi
 
-ES_sum_sim = Simulated_ES(nobs, a1, a2, b, c, d, xi, seed);
+ES_sum_sim = Simulated_ES_sum(nobs, a1, a2, b, c, d, xi, seed);
 X = ['ES via simulation for different levels: ', num2str(ES_sum_sim)]; 
 disp(X);
 
-% Now using smaller set of simulated values (1e4) we estimate parameters of
-% the stable distribution of the sum.
-nobs = 1e4; X1 = stabgen(nobs, a1, b, d, c, 0); X2 = stabgen(nobs, a2, b, d, c, 0); S = X1 + X2;
-[alpha,b,sigma,mu] = stablereg(S);
-X = ['Alpha: ', num2str(alpha), ' Beta: ', num2str(b), ' Sigma: ', num2str(sigma), ' Mu: ', num2str(mu),]; 
+% estimate parameters of the stable distribution of the sum. 
+nobs = 1e6; X1 = stabgen(nobs, a1, b, c, d, 1); X2 = stabgen(nobs, a2, b, c, d, 2); S = X1 + X2;
+[alpha,beta,sigma,mu] = stablereg(S);
+X = ['Alpha: ', num2str(alpha), ' Beta: ', num2str(beta), ' Sigma: ', num2str(sigma), ' Mu: ', num2str(mu),]; 
 disp(X);
 
-% Now we can use the estimated parameters to calculate the 
-[ES_stoy, VaR] = asymstableES(xi, alpha, b, mu, sigma ,1);
-X = ['ES via Stoyanov et al: ', num2str(ES_stoy)]; 
+% Now we can use the estimated parameters to calculate the ES via
+% simulation
+ES_stoy_sum = [];
+for i = 1:3
+    ES_stoy_sum(i) = asymstableES(xi(i), alpha, beta, mu, sigma ,1);
+end
+X = ['ES via Stoyanov et al: ', num2str(ES_stoy_sum)]; 
 disp(X);
 
 % Now we repeat it with new alphas
 a1 = 1.5; a2 = 1.9; 
-ES_sum_sim = Simulated_ES(nobs, a1, a2, b, c, d, xi, seed);
-X = ['ES via simulation for different levels: ', num2str(ES_sum_sim)]; 
+ES_sum_sim_2 = Simulated_ES_sum(nobs, a1, a2, b, c, d, xi, seed);
+X = ['ES via simulation for different levels: ', num2str(ES_sum_sim_2)]; 
 disp(X);
 
+% Now using smaller set of simulated values (1e4) we estimate parameters of
+% the stable distribution of the sum.
+nobs = 1e6; X1 = stabgen(nobs, a1, b, c, d, 1); X2 = stabgen(nobs, a2, b, c, d, 2); S = X1 + X2;
+[alpha,beta,sigma,mu] = stablereg(S);
+X = ['Alpha: ', num2str(alpha), ' Beta: ', num2str(beta), ' Sigma: ', num2str(sigma), ' Mu: ', num2str(mu),]; 
+disp(X);
+
+% Now we can use the estimated parameters to calculate the 
+ES_stoy_sum = [];
+for i = 1:3
+    ES_stoy_sum(i) = asymstableES(xi(i), alpha, beta, mu, sigma ,1);
+end
+X = ['ES via Stoyanov et al: ', num2str(ES_stoy_sum)]; 
+disp(X);
 
