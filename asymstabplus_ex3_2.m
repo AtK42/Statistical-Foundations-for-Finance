@@ -5,8 +5,6 @@ function f = asymstabplus_ex3_2 ( xvec , a1 , a2)
 bordertol=1e-8; lo=bordertol ; hi=1-bordertol ; tol =1e-7;
 xl=length(xvec ); F=zeros(xl ,1 ); f=F;
 for loop=1:length(xvec )
-    %x=(xvec(loop)-d)/c;
     x=xvec(loop);
     f(loop)=(integral(@(uvec) fffplus_ex3_2(uvec, x, a1, a2, 1), lo, hi)/pi);
-    %f(loop)=integral(@(uvec) fffplus_ex3_2(uvec, x, a1, a2, 1), lo, hi)/pi;
 end
