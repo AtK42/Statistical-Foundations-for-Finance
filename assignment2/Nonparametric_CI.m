@@ -1,7 +1,10 @@
 
 function [Length, Coverage_ratio] = Nonparametric_CI(T, rep, B, dist, param, trueES, alpha)
-% This function takes parameters for the number of simulations, true distribution (see below), the  %parameters for the true distribution and what the true ES would be. 
-% The output is a vector with all lengths of the CI's and the coverage, i.e., how many percent of the %CI's include the true ES
+% This function takes parameters for the number of simulations, true distribution (see below), the 
+% parameters for the true distribution and what the true ES would be. 
+
+% The output is a vector with all lengths of the CI's and the coverage, i.e., how many percent of the
+% CI's include the true ES
 
 % parameter specifications:
 % student-t (case 1): param = [scale, location, df]

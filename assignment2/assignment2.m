@@ -35,21 +35,21 @@ trueES = loc+scale*ES01 % true theoretical ES
 
 % simulate T-length vectors of IID location scale student t data
 %   and record the empirical ES, and then compare to true
-T=1e4; rep=200; ESvec=zeros(rep,1);
-for i=1:rep
-  data=loc+scale*trnd(df,T,1); VaR=quantile (data, alpha);
-  temp=data(data<=VaR); ESvec(i)=mean(temp);
+n_samp_vec=1e4; reps=200; ES_vec=zeros(reps,1);
+for i=1:reps
+  data=loc+scale*trnd(df,n_samp_vec,1); VaR=quantile (data, alpha);
+  temp=data(data<=VaR); ES_vec(i)=mean(temp);
 end
 
 %% Now make a nice, visually appealing graphic:
 figure
-histogram(ESvec), ax=axis;
+histogram(ES_vec), ax=axis;
 set(gca,'fontsize', 8)
 line ([ trueES trueES ] ,[0 ax(4)], 'color', 'g ', 'linewidth',3)
 xlabel('ES value (simulation and true as vertical line)')
-title(['Simulated Stud t Empirical ES, T=',int2str(T),' obs'])
+title(['Simulated Stud t Empirical ES, T=',int2str(n_samp_vec),' obs'])
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% exercise 1 (from first mail, 26.10.2022)
 % have a look at makedist
 %For the data generating process (DGP) of IID location-scale
 %  Student t, you fix the 3 true parameters, like we did above,
@@ -76,13 +76,63 @@ title(['Simulated Stud t Empirical ES, T=',int2str(T),' obs'])
 %       sequence of zeros and ones (or "true" and "false", for you
 %       computer science people...).
 
-rep = 10; T = 1e4; B = 250;
-df = 2; loc = 1; scale = 2; alpha = .1;
+reps = 10; n_samp_vec = [250 500 2000]; n_BS = 250; % note that n_samp = T
+df = 2; loc = 1; scale = 2; alpha = .05;
+initvec = [df 0 0];
 
-range default
-for i = 1:rep
-    data = loc + scale * trnd(df, T, 1);
-    ind = unidrnd(T, [T B]); bs_samp = data(ind);
-    ci = quantile(bs_samp, [alpha/2 1-alpha/2]); low = ci(1); high = ci(2);
-    ci_length = high - low; 
-end
+% set seed
+%rand ('twister', 6)
+rng(6, 'twister')
+
+% initialize variables
+ES_vec = zeros(n_BS, 1);
+ci_length = zeros([reps length(n_samp_vec)]);
+coverage = zeros([reps length(n_samp_vec)]);
+
+% calculate theoretical ES for the student t (analytically)
+c01=tinv(alpha , df);
+cLS = loc+scale*c01; % cLS is cutoff Location Scale
+ES_01_analytic = -tpdf(c01,df)/tcdf(c01,df) * (df+c01^2)/(df-1);
+ES_LS_analytic = loc+scale*ES_01_analytic;
+
+for k = 1:length(n_samp_vec)
+    for i = 1:reps
+        % generate "T" data points from the t-dist with "df" degrees of freedom
+        % and location "loc" and scale "scale" (words in quotes refer to
+        % variables)
+        data = loc + scale * trnd(df, n_samp_vec(k), 1);
+
+        % parametric bootstrap
+        para_bs = tlikmax0(data, initvec)
+
+        % non-parametric bootstrap
+        for j = 1:n_BS
+            % generate a non-parametric bootstrap sample from the "original" sample in the current "i" loop
+            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
+            bs_samp = data(ind);
+            % compute "alpha"%-ES for each bootstrap sample
+            VaR = quantile(bs_samp, alpha);
+            temp=bs_samp(bs_samp<=VaR);
+            ES_vec(j)=mean(temp);
+        end
+        % compute length of the CI
+        ci = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        low = ci(1); high = ci(2);
+        ci_length(i, k) = high - low;
+        if ES_LS_analytic >= low && ES_LS_analytic <= high
+            coverage(i, k) = 1;
+        end
+    end %i-loop
+end %k-loop
+
+% compare the length of the CIs as a function of the sample size n_samp (= T)
+mean(ci_length)
+
+% compare coverage ratio of the theoretical ES as a function of the sample size n_samp (= T)
+mean(coverage)
+%% exercise 2
+% define parameters
+df_vec = [3 6]; % degrees of freedom of the NCT
+mu_vec = [0 -1 -2 -3 -4]; % (numerator) non-centrality parameter of the NCT
+theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
+
