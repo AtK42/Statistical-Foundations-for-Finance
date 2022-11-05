@@ -6,10 +6,12 @@ bound.hi=[100 1 100];
 bound.which=[1 0 1];
 %In this case , as bound . which for mu is zero , mu will not be
 %restricted. As such, the values for .lo and .hi are irrelevant
+%listing 4.6
 
 maxiter = 100; tol = 1e-3;% change these as you see fit
-opts = optimset('Display', 'notify−detailed' , 'Maxiter', maxiter, 'TolFun', tol, 'TolX', tol, 'LargeScale', 'Off');
+opts = optimset('Display', 'notify-detailed' , 'Maxiter', maxiter, 'TolFun', tol, 'TolX', tol, 'LargeScale', 'Off');
 [pout, fval, exitflag, theoutput, grad, hess] = fminunc(@(param) tloglik(param, x, bound), einschrk(initvec, bound), opts);
+
 V = inv(hess); % Don't negate: we work with the neg of the loglik
 [param, V] = einschrk(pout, bound, V); % Transform back, apply delta method
 param = param' ; Varcov = V;
@@ -23,7 +25,8 @@ if nargin < 3
 end
 if isstruct(bound)
     paramvec=einschrk(real(param), bound, 999);
-else paramvec = param;
+else
+    paramvec = param;
 end
 
 v = paramvec(1); mu = paramvec(2);c = paramvec(3);
