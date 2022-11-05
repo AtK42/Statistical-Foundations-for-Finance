@@ -81,7 +81,6 @@ df = 2; loc = 1; scale = 2; alpha = .05;
 initvec = [df 0 0];
 
 % set seed
-%rand ('twister', 6)
 rng(6, 'twister')
 
 % initialize variables
@@ -103,15 +102,17 @@ for k = 1:length(n_samp_vec)
         data = loc + scale * trnd(df, n_samp_vec(k), 1);
 
         % parametric bootstrap
-        para_bs = tlikmax0(data, initvec)
+        %para_bs = tlikmax0(data, initvec);
+        %para_bs = fitdist(data, 'tLocationScale');
+        para_bs = mle(data, 'Distribution', 'tLocationScale');
 
-        % non-parametric bootstrap
         for j = 1:n_BS
+        % non-parametric bootstrap
             % generate a non-parametric bootstrap sample from the "original" sample in the current "i" loop
             ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
             bs_samp = data(ind);
             % compute "alpha"%-ES for each bootstrap sample
-            VaR = quantile(bs_samp, alpha);
+            VaR = quantile(bs_samp, alpha/2);
             temp=bs_samp(bs_samp<=VaR);
             ES_vec(j)=mean(temp);
         end
