@@ -71,7 +71,7 @@ for k = 1:length(n_samp_vec)
         % (ii) assymetric student t
         elseif dist == 2
             % generate the random sample
-            data = asymt(df, mu, n_samp_vec(k)); % !!NEED TO CREATE THIS FUNCTION!!
+            data = asymtrnd(df, mu, n_samp_vec(k)); % !!NEED TO CREATE THIS FUNCTION!!
 
         % (iii) symmetric stable
         elseif dist == 3
