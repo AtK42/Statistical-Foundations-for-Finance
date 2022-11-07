@@ -76,8 +76,8 @@ title(['Simulated Stud t Empirical ES, T=',int2str(n_samp_vec),' obs'])
 %       sequence of zeros and ones (or "true" and "false", for you
 %       computer science people...).
 
-reps = 10; n_samp_vec = [250 500 2000]; n_BS = 250; % note that n_samp = T
-df = 2; loc = 1; scale = 2; alpha = .05;
+reps = 10; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+df = 2; loc = 1; scale = 2; alpha = .1;
 initvec = [df 0 0];
 
 % set seed
@@ -93,6 +93,7 @@ c01=tinv(alpha , df);
 cLS = loc+scale*c01; % cLS is cutoff Location Scale
 ES_01_analytic = -tpdf(c01,df)/tcdf(c01,df) * (df+c01^2)/(df-1);
 ES_LS_analytic = loc+scale*ES_01_analytic;
+trueES = ES_LS_analytic;
 
 for k = 1:length(n_samp_vec)
     for i = 1:reps

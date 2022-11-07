@@ -1,9 +1,9 @@
-function [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp, n_BS, dist, params, trueES, alpha)
+function [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, trueES, alpha)
 % function to calculate the non-parametric CI
 
 % input parameters:
 % % reps:       number of repetitions
-% % n_samp:     size of the random sample generated
+% % n_samp_vec: size of the random sample generated as a vector
 % % n_BS:       number of bootstrap samples taken from each random sample
 % % dist:       true distribution, can be either 
 %               (i)     the symmetric student t (case 1)
@@ -17,11 +17,6 @@ function [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp, n_BS
 % output:       a vector with 
 %               (i) lengths of the CIs (one for each repetition)
 %               (ii) the coverage, i.e., percentage of the CIs that include the true ES
-
-
-% initialize variables
-average_length = zeros(length(n_samp),1);
-coverage_ratio = zeros(length(n_samp),1);
 
 if dist == 1
     % check whether user input is valid
@@ -47,10 +42,22 @@ elseif dist == 3
 else
     error("Please specify a valid distribution. See function documentation for more information.");
 end
-for k = 1:length(n_samp)
+
+% initialize variables
+%average_length = zeros(length(n_samp),1);
+%coverage_ratio = zeros(length(n_samp),1);
+ES_vec = zeros(n_BS, 1);
+ci_len = zeros([reps length(n_samp_vec)]);
+coverage = zeros([reps length(n_samp_vec)]);
+
+% set seed
+rng(6, 'twister')
+
+for k = 1:length(n_samp_vec)
     % initialize variables
-    len=zeros(reps,1);
-    coverage=zeros(reps,1);
+    %len=zeros(reps,1);
+    %coverage=zeros(reps,1);
+
     for i = 1:reps
     % first, generate the true dataset
 
@@ -59,45 +66,55 @@ for k = 1:length(n_samp)
             % reset seed (for reproducibility)
             % rng default;
             % generate the random sample
-            data=location+scale*trnd(df,n_samp(k),1); 
+            data=location+scale*trnd(df,n_samp_vec(k),1); 
     
         % (ii) assymetric student t
         elseif dist == 2
             % generate the random sample
-            data = asymt(df, mu, n_samp(k)); % !!NEED TO CREATE THIS FUNCTION!!
+            data = asymt(df, mu, n_samp_vec(k)); % !!NEED TO CREATE THIS FUNCTION!!
 
         % (iii) symmetric stable
         elseif dist == 3
             % generate the random sample
-            data = stblrnd(a, 0, scale, location, n_samp(k), 1);
+            data = stblrnd(a, 0, scale, location, n_samp_vec(k), 1);
         end
 
-        ESvec=zeros(n_BS,1);
+        %ESvec=zeros(n_BS,1);
         for j=1:n_BS
             % create bootstrap sample
-            ind = unidrnd(n_samp(k), n_samp(k));
+            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
             bs_samp = data(ind);
-      
+
             % calculate ES
-            VaR=quantile(bs_samp, alpha); temp=bs_samp(bs_samp<=VaR); ESvec(j)=mean(temp);  
+            VaR=quantile(bs_samp, alpha);
+            temp=bs_samp(bs_samp<=VaR);
+            ES_vec(j)=mean(temp);  
         end
+        
+        % create bootstrap sample
+        % ind = unidrnd(n_samp(k), [n_samp(k) n_BS]);
+        % bs_samp = data(ind);
+        
+        % calculate ES
+        % VaR = quantile(bs_samp, alpha);
+        % 
 
         % calculate CI
-        ci = quantile(ESvec, [alpha/2 1-alpha/2]);
+        ci = quantile(ES_vec, [alpha/2 1-alpha/2]);
         lower_bound = ci(1); upper_bound = ci(2);
-        len(i) = upper_bound - lower_bound;
+        ci_len(i, k) = upper_bound - lower_bound;
 
         % calculate Coverage
         if trueES >= lower_bound && trueES <= upper_bound
-            coverage(i) = 1;
+            coverage(i, k) = 1;
         end
     end % end of 'reps' loop
+end % end of k-loop
 
-average_length(k) = mean(len);
-coverage_ratio(k) = mean(coverage);
+average_length = mean(ci_len);
+coverage_ratio = mean(coverage);
 
 end % end of function
-end
 
 
    
