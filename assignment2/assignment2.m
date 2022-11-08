@@ -85,8 +85,10 @@ rng(6, 'twister')
 
 % initialize variables
 ES_vec = zeros(n_BS, 1);
-ci_length = zeros([reps length(n_samp_vec)]);
-coverage = zeros([reps length(n_samp_vec)]);
+ci_length_para = zeros([reps length(n_samp_vec)]);
+coverage_para = zeros([reps length(n_samp_vec)]);
+ci_length_nonpara = zeros([reps length(n_samp_vec)]);
+coverage_nonpara = zeros([reps length(n_samp_vec)]);
 
 % calculate theoretical ES for the student t (analytically)
 c01=tinv(alpha , df);
@@ -101,14 +103,31 @@ for k = 1:length(n_samp_vec)
         % and location "loc" and scale "scale" (words in quotes refer to
         % variables)
         data = loc + scale * trnd(df, n_samp_vec(k), 1);
-
+        
         % parametric bootstrap
-        %para_bs = tlikmax0(data, initvec);
-        %para_bs = fitdist(data, 'tLocationScale');
-        para_bs = mle(data, 'Distribution', 'tLocationScale');
-
+        % % estimate parameter of the noncentral t dist
+        para_bs_hat = mle(data, 'Distribution', 'tLocationScale'); % output: [loc scale df]
+        para_loc_hat = para_bs_hat(1);
+        para_scale_hat = para_bs_hat(2);
+        para_df_hat = para_bs_hat(3);
+        
+        % % generate parametric bootstrap sample with the estimated parameters
         for j = 1:n_BS
+           bs_samp = para_loc_hat + para_scale_hat * trnd(para_df_hat, n_samp_vec(k), 1);
+           
+           VaR = quantile(bs_samp, alpha/2);
+           temp = bs_samp(bs_samp<=VaR);
+           ES_vec(j) = mean(temp);
+        end
+        ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        low_para = ci_para(1); high_para = ci_para(2);
+        ci_length_para(i, k) = high_para - low_para;
+        if ES_LS_analytic >= low_para && ES_LS_analytic <= high_para
+            coverage_para(i,k) = 1;
+        end
+
         % non-parametric bootstrap
+        for j = 1:n_BS
             % generate a non-parametric bootstrap sample from the "original" sample in the current "i" loop
             ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
             bs_samp = data(ind);
@@ -117,21 +136,21 @@ for k = 1:length(n_samp_vec)
             temp=bs_samp(bs_samp<=VaR);
             ES_vec(j)=mean(temp);
         end
-        % compute length of the CI
-        ci = quantile(ES_vec, [alpha/2 1-alpha/2]);
-        low = ci(1); high = ci(2);
-        ci_length(i, k) = high - low;
-        if ES_LS_analytic >= low && ES_LS_analytic <= high
-            coverage(i, k) = 1;
+        % % compute length of the CI
+        ci_nonpara = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        low_nonpara = ci_nonpara(1); high_nonpara = ci_nonpara(2);
+        ci_length_nonpara(i, k) = high_nonpara - low_nonpara;
+        if ES_LS_analytic >= low_nonpara && ES_LS_analytic <= high_nonpara
+            coverage_nonpara(i, k) = 1;
         end
     end %i-loop
 end %k-loop
 
 % compare the length of the CIs as a function of the sample size n_samp (= T)
-mean(ci_length)
+mean(ci_length_nonpara)
 
 % compare coverage ratio of the theoretical ES as a function of the sample size n_samp (= T)
-mean(coverage)
+mean(coverage_nonpara)
 %% exercise 2
 % define parameters
 df_vec = [3 6]; % degrees of freedom of the NCT
