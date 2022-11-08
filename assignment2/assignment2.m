@@ -147,12 +147,16 @@ for k = 1:length(n_samp_vec)
 end %k-loop
 
 % compare the length of the CIs as a function of the sample size n_samp (= T)
-disp('the average CI length with parametric bootstrap is:', mean(ci_length_para))
-disp('the average CI length with non-parametric bootstrap is:', mean(ci_length_nonpara))
+%disp(['the average CI length with parametric bootstrap is:', num2str(mean(ci_length_para))])
+%disp(['the average CI length with non-parametric bootstrap is:', num2str(mean(ci_length_nonpara))])
+mean(ci_length_para)
+mean(ci_length_nonpara)
 
 % compare coverage ratio of the theoretical ES as a function of the sample size n_samp (= T)
-disp('the average coverage with parametric bootstrap is:', mean(coverage_para))
-disp('the average coverage with non-parametric bootstrap is:', mean(coverage_nonpara))
+%disp(['the average coverage with parametric bootstrap is:', num2str(mean(coverage_para))])
+%disp(['the average coverage with non-parametric bootstrap is:', num2str(mean(coverage_nonpara))])
+mean(coverage_para)
+mean(coverage_nonpara)
 
 %% exercise 2
 % define parameters
