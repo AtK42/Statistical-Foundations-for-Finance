@@ -91,14 +91,6 @@ for k = 1:length(n_samp_vec)
             ES_vec(j)=mean(temp);  
         end
         
-        % create bootstrap sample
-        % ind = unidrnd(n_samp(k), [n_samp(k) n_BS]);
-        % bs_samp = data(ind);
-        
-        % calculate ES
-        % VaR = quantile(bs_samp, alpha);
-        % 
-
         % calculate CI
         ci = quantile(ES_vec, [alpha/2 1-alpha/2]);
         lower_bound = ci(1); upper_bound = ci(2);

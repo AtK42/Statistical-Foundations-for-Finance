@@ -50,32 +50,6 @@ xlabel('ES value (simulation and true as vertical line)')
 title(['Simulated Stud t Empirical ES, T=',int2str(n_samp_vec),' obs'])
 
 %% exercise 1 (from first mail, 26.10.2022)
-% have a look at makedist
-%For the data generating process (DGP) of IID location-scale
-%  Student t, you fix the 3 true parameters, like we did above,
-%  and then in a FOR loop, you simulate "rep" repetitions of
-%  an IID T-length sequence of Student t, say rep=1000.
-%  (Naturally, you try your codes with rep=2, to ensure they
-%  work, and then choose rep based on your computing resources, e.g.,
-%  perhaps 1000 is too high for your little laptop...)
-
-%  Make your program general in that T and rep are either defined
-%  up front, or passed as an argument.
-
-%Now, for each of those "rep" repetitions, you calculate a bootstrap
-%  confidence interval, 90%, based on B bootstrap replications, where
-%  B should be at least 1000, though you can try smaller values,
-%  and assess if, say, B=250 is in fact enough.
-
-%For each of the "rep" CIs, you then compute two things:
-%    a) the length of the interval,
-%    b) whether or not the interval contains the TRUE ES, which you
-%        of course have, because we know the true DGP. The above
-%        codes have the computation of the theoretical Student t
-%       ES in there, as you saw.  Notice the vector produced is a
-%       sequence of zeros and ones (or "true" and "false", for you
-%       computer science people...).
-
 reps = 10; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df = 2; loc = 1; scale = 2; alpha = .1;
 initvec = [df 0 0];
@@ -104,7 +78,7 @@ for k = 1:length(n_samp_vec)
         % variables)
         data = loc + scale * trnd(df, n_samp_vec(k), 1);
         
-        % parametric bootstrap
+        % parametric bootstrap with matlab function mle
         % % estimate parameter of the noncentral t dist
         para_bs_hat = mle(data, 'Distribution', 'tLocationScale'); % output: [loc scale df]
         para_loc_hat = para_bs_hat(1);
