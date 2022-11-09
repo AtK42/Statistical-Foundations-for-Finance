@@ -82,7 +82,7 @@ for k = 1:length(n_samp_vec)
         %ESvec=zeros(n_BS,1);
         for j=1:n_BS
             % create bootstrap sample
-            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
+            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]); % funktioniert das?
             bs_samp = data(ind);
 
             % calculate ES
