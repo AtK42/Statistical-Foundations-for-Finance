@@ -10,10 +10,16 @@ alpha=0.01; df=4; c01=tinv(alpha , df);
 
 %% location zero, scale 1 ES for student t, calculating it
 %   using first the analytic exact expression:
+tic
 ES_01_analytic = -tpdf(c01,df)/tcdf(c01,df) * (df+c01^2)/(df-1) %#ok<*NOPTS>
+toc
+disp(toc-tic)
 % and now numeric integration:
+tic
 I01 = @(x) x.*tpdf(x, df);
 ES_01_numint = integral(I01 , -Inf , c01) / alpha
+toc
+disp(toc-tic)
 % they agree to about 14 digits!
 
 %% now incorporate location and scale and check analytic vs numint
@@ -125,23 +131,25 @@ for k = 1:length(n_samp_vec)
             
             % parametric
             para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
-            para_bs_hat_MP = tlikmax(bs_samp, [1 1 1]) %MP: Marc Paolella
+            para_bs_hat_MP = tlikmax(bs_samp, [2 2 2]); %MP: Marc Paolella
             %now calculate the theoretical ES based on the parameter
             %estimates
-            
+            c01=tinv(alpha , para_bs_hat_MP(1));
+            ES_vec(j) = para_bs_hat_MP(2) + para_bs_hat_MP(3) * (-tpdf(c01,para_bs_hat_MP(1))/tcdf(c01,para_bs_hat_MP(1)) * (para_bs_hat_MP(1)+c01^2)/(para_bs_hat_MP(1)-1));
+            disp(ES_vec(j))
             % non-parametric
             % directly compute "alpha"%-ES for each bootstrap sample
-            VaR = quantile(bs_samp, alpha/2);
-            temp=bs_samp(bs_samp<=VaR);
-            ES_vec(j)=mean(temp);
+            % VaR = quantile(bs_samp, alpha/2);
+            % temp=bs_samp(bs_samp<=VaR);
+            % ES_vec(j)=mean(temp);
         end
-        % % compute length of the CI
-        % ci_nonpara = quantile(ES_vec, [alpha/2 1-alpha/2]);
-        % low_nonpara = ci_nonpara(1); high_nonpara = ci_nonpara(2);
-        % ci_length_nonpara(i, k) = high_nonpara - low_nonpara;
-        % if ES_LS_analytic >= low_nonpara && ES_LS_analytic <= high_nonpara
-            % coverage_nonpara(i, k) = 1;
-        % end
+        % compute length of the CI
+        ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        low_para = ci_para(1); high_para = ci_para(2);
+        ci_length_para(i, k) = high_para - low_para;
+        if ES_LS_analytic >= low_para && ES_LS_analytic <= high_para
+            coverage_para(i, k) = 1;
+        end
     end %i-loop
 end %k-loop
 
