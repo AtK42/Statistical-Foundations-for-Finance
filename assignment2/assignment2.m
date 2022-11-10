@@ -80,32 +80,40 @@ for k = 1:length(n_samp_vec)
         
         % parametric bootstrap with matlab function mle
         % % estimate parameter of the noncentral t dist
-        para_bs_hat = mle(data, 'Distribution', 'tLocationScale'); % output: [loc scale df]
-        para_loc_hat = para_bs_hat(1);
-        para_scale_hat = para_bs_hat(2);
-        para_df_hat = para_bs_hat(3);
+        %para_bs_hat = mle(data, 'Distribution', 'tLocationScale'); % output: [loc scale df]
+        %para_loc_hat = para_bs_hat(1);
+        %para_scale_hat = para_bs_hat(2);
+        %para_df_hat = para_bs_hat(3);
         
         % % generate parametric bootstrap sample with the estimated parameters
-        for j = 1:n_BS
-           bs_samp = para_loc_hat + para_scale_hat * trnd(para_df_hat, n_samp_vec(k), 1);
-           
-           VaR = quantile(bs_samp, alpha/2);
-           temp = bs_samp(bs_samp<=VaR);
-           ES_vec(j) = mean(temp);
-        end
-        ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
-        low_para = ci_para(1); high_para = ci_para(2);
-        ci_length_para(i, k) = high_para - low_para;
-        if ES_LS_analytic >= low_para && ES_LS_analytic <= high_para
-            coverage_para(i,k) = 1;
-        end
+        %for j = 1:n_BS
+        %   bs_samp = para_loc_hat + para_scale_hat * trnd(para_df_hat, n_samp_vec(k), 1);
+        %   
+        %   VaR = quantile(bs_samp, alpha/2);
+        %   temp = bs_samp(bs_samp<=VaR);
+        %   ES_vec(j) = mean(temp);
+        %end
+        %ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        %low_para = ci_para(1); high_para = ci_para(2);
+        %ci_length_para(i, k) = high_para - low_para;
+        %if ES_LS_analytic >= low_para && ES_LS_analytic <= high_para
+        %    coverage_para(i,k) = 1;
+        %end
 
         % non-parametric bootstrap
         for j = 1:n_BS
-            % generate a non-parametric bootstrap sample from the "original" sample in the current "i" loop
+            
             ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
             bs_samp = data(ind);
-            % compute "alpha"%-ES for each bootstrap sample
+            
+            % parametric
+            para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
+            para_bs_hat_MP = tlikmax(bs_samp, [1 1 1]) %MP: Marc Paolella
+            %now calculate the theoretical ES based on the parameter
+            %estimates
+            
+            % non-parametric
+            % directly compute "alpha"%-ES for each bootstrap sample
             VaR = quantile(bs_samp, alpha/2);
             temp=bs_samp(bs_samp<=VaR);
             ES_vec(j)=mean(temp);
