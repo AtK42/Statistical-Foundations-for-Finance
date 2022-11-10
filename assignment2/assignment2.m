@@ -117,7 +117,6 @@ for k = 1:length(n_samp_vec)
         %    coverage_para(i,k) = 1;
         %end
 
-        % non-parametric bootstrap
         for j = 1:n_BS
             
             ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
@@ -125,7 +124,7 @@ for k = 1:length(n_samp_vec)
             
             % parametric
             para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
-            para_bs_hat_MP = tlikmax(bs_samp, [1 1 1]) %MP: Marc Paolella
+            para_bs_hat_MP = tlikmax(bs_samp, initvec) %MP: Marc Paolella
             %now calculate the theoretical ES based on the parameter
             %estimates
             
@@ -134,7 +133,7 @@ for k = 1:length(n_samp_vec)
             VaR = quantile(bs_samp, alpha/2);
             temp=bs_samp(bs_samp<=VaR);
             ES_vec(j)=mean(temp);
-        end
+        end % j-loop (bootstrap loop)
         % % compute length of the CI
         % ci_nonpara = quantile(ES_vec, [alpha/2 1-alpha/2]);
         % low_nonpara = ci_nonpara(1); high_nonpara = ci_nonpara(2);
@@ -142,8 +141,8 @@ for k = 1:length(n_samp_vec)
         % if ES_LS_analytic >= low_nonpara && ES_LS_analytic <= high_nonpara
             % coverage_nonpara(i, k) = 1;
         % end
-    end %i-loop
-end %k-loop
+    end %i-loop (reps loop)
+end %k-loop (sample size loop)
 
 % compare the length of the CIs as a function of the sample size n_samp (= T)
 %disp(['the average CI length with parametric bootstrap is:', num2str(mean(ci_length_para))])
