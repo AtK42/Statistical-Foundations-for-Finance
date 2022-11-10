@@ -10,16 +10,12 @@ alpha=0.01; df=4; c01=tinv(alpha , df);
 
 %% location zero, scale 1 ES for student t, calculating it
 %   using first the analytic exact expression:
-tic
 ES_01_analytic = -tpdf(c01,df)/tcdf(c01,df) * (df+c01^2)/(df-1) %#ok<*NOPTS>
-toc
-disp(toc-tic)
+
 % and now numeric integration:
-tic
 I01 = @(x) x.*tpdf(x, df);
 ES_01_numint = integral(I01 , -Inf , c01) / alpha
-toc
-disp(toc-tic)
+
 % they agree to about 14 digits!
 
 %% now incorporate location and scale and check analytic vs numint
@@ -136,6 +132,7 @@ for k = 1:length(n_samp_vec)
             c01=tinv(alpha , para_bs_hat_MP(1));
             ES_vec(j) = para_bs_hat_MP(2) + para_bs_hat_MP(3) * (-tpdf(c01,para_bs_hat_MP(1))/tcdf(c01,para_bs_hat_MP(1)) * (para_bs_hat_MP(1)+c01^2)/(para_bs_hat_MP(1)-1));
             disp(ES_vec(j))
+
             % non-parametric
             % directly compute "alpha"%-ES for each bootstrap sample
             % VaR = quantile(bs_samp, alpha/2);
@@ -166,33 +163,55 @@ mean(coverage_para)
 
 %% exercise 2
 % define parameters
-
+delim = '************************************';
+n_samp = 1e7; n_samp_vec = [250 500 2000];
 df_vec = [3 6]; % degrees of freedom of the NCT
-mu_vec = [0 -1 -2 -3 -4]; % (numerator) non-centrality parameter of the NCT
+mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 seed = 6; alpha = .1;
 
-% 1. Calculate ES via
-% i) Simulation:
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% part 1 (learn how to simulate from non-central location-scale t)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% see function asymtrnd
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% part 2 (calculate true ES of the NTC for the following parameters and via
+%   (i) simulation and 
+%   (ii) integral definition of the NTC for):
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % two different df:                           |    3|    6|     |     |
+% % four different asymmetry parameters (mu):   |   -3|   -2|   -1|    0|
+
+disp(delim); disp(['ES for different df and non-centrality', newline, 'parameters of the NCT (mu)']);
 for df = 1:numel(df_vec)
-    ES_sim = zeros(1,[numel(mu_vec)]);
-    for mu = 1:numel(mu_vec)
-            ES_sim(mu) = Simulated_ES_NCT(1e7, df_vec(df), mu_vec(mu), alpha, seed);
-    end % end mu
-    disp(['Simulation: ', num2str(ES_sim)]);
+        disp(delim); disp(['for df = ', num2str(df_vec(df))]);
+    % (i) Simulation:
+        ES_sim = zeros(numel(mu_vec), 1);
+        for mu = 1:numel(mu_vec)
+                ES_sim(mu) = Simulated_ES_NCT(n_samp, df_vec(df), mu_vec(mu), alpha, seed);
+        end % end mu-loop
+        disp(['via Simulation:          ', num2str(ES_sim', ' %.4f')]);
 
+    % (ii) numeric integration:
+        ES_num = zeros(numel(mu_vec), 1);
+        for mu = 1:numel(mu_vec)
+                c01=nctinv(alpha , df_vec(df), mu_vec(mu));
+                I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
+                ES_num(mu) = integral(I01 , -Inf , c01) / alpha;
+        end % end mu-loop
+        disp(['via Numeric Integration: ', num2str(ES_num', '  %.4f')]);
+end % df-loop (for df)
+disp(delim);
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% part 3 (report average length of CI and actual coverage with both bootstrap methods)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % two different df:                           |    3|    6|     |     |
+% % three different sample sizes (n_samp):      |  250|  500| 2000|     |
+% % four different asymmetry parameters (mu):   |   -3|   -2|   -1|    0|
 
-% ii) numeric integration:
-    ES_num = zeros(1,[numel(mu_vec)]);
-    for mu = 1:numel(mu_vec)
-            c01=nctinv(alpha , df_vec(df), mu_vec(mu));
-            I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu));
-            ES_num(mu) = integral(I01 , -Inf , c01) / alpha;
-    end % end mu
-    disp(['Numeric Integration: ', num2str(ES_num)]);
-end
-
-% 2. non-parametric bootstrap
+% (i) non-parametric bootstrap
 for df = 1:numel(df_vec)
     for mu=1:numel(mu_vec)
         [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df_vec(df), mu_vec(mu)], ES_num(mu), alpha);
@@ -201,7 +220,7 @@ for df = 1:numel(df_vec)
     end % end mu
 end
 
-% 3. parametric bootstrap based on student t distribution, !!Coverage rate is wrong!!
+% (ii) parametric bootstrap based on student t distribution, !!Coverage rate is wrong!!
 for df = 1:numel(df_vec)
     mle_method = 1;
     for k = 1:length(n_samp_vec)
@@ -214,13 +233,13 @@ for df = 1:numel(df_vec)
         
                 % 2 methods for MLE (!! second methods gives wrong values!!)
                 % We wrongly assume a t distribution and do MLE
-                % i) matlab function mle
+                % (a) matlab function mle
                 if mle_method == 1
                     para_bs_hat = mle(data, 'Distribution', 'tLocationScale'); % output: [loc scale df]
                     para_loc_hat = para_bs_hat(1);
                     para_scale_hat = para_bs_hat(2);
                     para_df_hat = para_bs_hat(3);
-                % ii) function from book 
+                % (b) function from book 
                 elseif mle_method == 2
                     [param, stderr, iters, loglik, Varcov] = tlikmax(data, initvec);
                     para_loc_hat = param(1);

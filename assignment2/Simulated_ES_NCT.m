@@ -11,7 +11,7 @@ function ES_sim = Simulated_ES_NCT(n_samp, df, mu, alpha, seed)
 % % seed: random seed for reproducability
 
 X = asymtrnd(n_samp, mu, df, seed);
-q = quantile(X, alpha);
-Plo = X(X < q);
+VaR = quantile(X, alpha);
+Plo = X(X < VaR);
 ES_sim = mean(Plo);
 end
