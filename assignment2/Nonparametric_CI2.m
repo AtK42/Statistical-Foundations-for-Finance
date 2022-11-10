@@ -71,7 +71,7 @@ for k = 1:length(n_samp_vec)
         % (ii) assymetric student t
         elseif dist == 2
             % generate the random sample
-            data = asymtrnd(df, mu, n_samp_vec(k)); % !!NEED TO CREATE THIS FUNCTION!!
+            data = asymtrnd(n_samp_vec(k), mu, df, 1); 
 
         % (iii) symmetric stable
         elseif dist == 3
@@ -82,7 +82,7 @@ for k = 1:length(n_samp_vec)
         %ESvec=zeros(n_BS,1);
         for j=1:n_BS
             % create bootstrap sample
-            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
+            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]); % funktioniert das?
             bs_samp = data(ind);
 
             % calculate ES
