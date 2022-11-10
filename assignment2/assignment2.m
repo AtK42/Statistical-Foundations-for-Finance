@@ -50,9 +50,9 @@ xlabel('ES value (simulation and true as vertical line)')
 title(['Simulated Stud t Empirical ES, T=',int2str(n_samp_vec),' obs'])
 
 %% exercise 1 (from first mail, 26.10.2022)
-reps = 10; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df = 2; loc = 1; scale = 2; alpha = .1;
-initvec = [df 0 0];
+initvec = [2 2 2]; % prior assumption for mle: [df, location, scale]
 
 % set seed
 rng(6, 'twister')
@@ -61,8 +61,8 @@ rng(6, 'twister')
 ES_vec = zeros(n_BS, 1);
 ci_length_para = zeros([reps length(n_samp_vec)]);
 coverage_para = zeros([reps length(n_samp_vec)]);
-ci_length_nonpara = zeros([reps length(n_samp_vec)]);
-coverage_nonpara = zeros([reps length(n_samp_vec)]);
+% ci_length_nonpara = zeros([reps length(n_samp_vec)]);
+% coverage_nonpara = zeros([reps length(n_samp_vec)]);
 
 % calculate theoretical ES for the student t (analytically)
 c01=tinv(alpha , df);
@@ -71,6 +71,13 @@ ES_01_analytic = -tpdf(c01,df)/tcdf(c01,df) * (df+c01^2)/(df-1);
 ES_LS_analytic = loc+scale*ES_01_analytic;
 trueES = ES_LS_analytic;
 
+% nonparametric bootstrap
+[average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 1, [scale, loc, df], trueES, alpha);
+disp(['Average nonparametric CI Length: ', num2str(average_length)]);
+disp(['Nonparametric Coverage Ratio: ', num2str(coverage_ratio)]);
+
+% parametric bootstrap, choose which method for MLE should be used
+mle_method = 1;
 for k = 1:length(n_samp_vec)
     for i = 1:reps
         % generate "T" data points from the t-dist with "df" degrees of freedom
@@ -78,18 +85,26 @@ for k = 1:length(n_samp_vec)
         % variables)
         data = loc + scale * trnd(df, n_samp_vec(k), 1);
         
-        % parametric bootstrap with matlab function mle
-        % % estimate parameter of the noncentral t dist
-        para_bs_hat = mle(data, 'Distribution', 'tLocationScale'); % output: [loc scale df]
-        para_loc_hat = para_bs_hat(1);
-        para_scale_hat = para_bs_hat(2);
-        para_df_hat = para_bs_hat(3);
+        % 2 methods for MLE (!! second methods gives wrong values!!)
+        % i) matlab function mle
+        if mle_method == 1
+            para_bs_hat = mle(data, 'Distribution', 'tLocationScale'); % output: [loc scale df]
+            para_loc_hat = para_bs_hat(1);
+            para_scale_hat = para_bs_hat(2);
+            para_df_hat = para_bs_hat(3);
+        % ii) function from book 
+        elseif mle_method == 2
+            [param, stderr, iters, loglik, Varcov] = tlikmax(data, initvec);
+            para_loc_hat = param(1);
+            para_scale_hat = param(2);
+            para_df_hat = param(3);
+        end
         
-        % % generate parametric bootstrap sample with the estimated parameters
+        % generate parametric bootstrap sample with the estimated parameters
+        
         for j = 1:n_BS
            bs_samp = para_loc_hat + para_scale_hat * trnd(para_df_hat, n_samp_vec(k), 1);
-           
-           VaR = quantile(bs_samp, alpha/2);
+           VaR = quantile(bs_samp, alpha);
            temp = bs_samp(bs_samp<=VaR);
            ES_vec(j) = mean(temp);
         end
@@ -101,22 +116,22 @@ for k = 1:length(n_samp_vec)
         end
 
         % non-parametric bootstrap
-        for j = 1:n_BS
+        % for j = 1:n_BS
             % generate a non-parametric bootstrap sample from the "original" sample in the current "i" loop
-            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
-            bs_samp = data(ind);
+            % ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
+            % bs_samp = data(ind);
             % compute "alpha"%-ES for each bootstrap sample
-            VaR = quantile(bs_samp, alpha/2);
-            temp=bs_samp(bs_samp<=VaR);
-            ES_vec(j)=mean(temp);
-        end
+            % VaR = quantile(bs_samp, alpha/2);
+            % temp=bs_samp(bs_samp<=VaR);
+            % ES_vec(j)=mean(temp);
+        % end
         % % compute length of the CI
-        ci_nonpara = quantile(ES_vec, [alpha/2 1-alpha/2]);
-        low_nonpara = ci_nonpara(1); high_nonpara = ci_nonpara(2);
-        ci_length_nonpara(i, k) = high_nonpara - low_nonpara;
-        if ES_LS_analytic >= low_nonpara && ES_LS_analytic <= high_nonpara
-            coverage_nonpara(i, k) = 1;
-        end
+        % ci_nonpara = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        % low_nonpara = ci_nonpara(1); high_nonpara = ci_nonpara(2);
+        % ci_length_nonpara(i, k) = high_nonpara - low_nonpara;
+        % if ES_LS_analytic >= low_nonpara && ES_LS_analytic <= high_nonpara
+            % coverage_nonpara(i, k) = 1;
+        % end
     end %i-loop
 end %k-loop
 
@@ -124,17 +139,106 @@ end %k-loop
 %disp(['the average CI length with parametric bootstrap is:', num2str(mean(ci_length_para))])
 %disp(['the average CI length with non-parametric bootstrap is:', num2str(mean(ci_length_nonpara))])
 mean(ci_length_para)
-mean(ci_length_nonpara)
+% mean(ci_length_nonpara)
 
 % compare coverage ratio of the theoretical ES as a function of the sample size n_samp (= T)
 %disp(['the average coverage with parametric bootstrap is:', num2str(mean(coverage_para))])
 %disp(['the average coverage with non-parametric bootstrap is:', num2str(mean(coverage_nonpara))])
 mean(coverage_para)
-mean(coverage_nonpara)
+% mean(coverage_nonpara)
 
 %% exercise 2
 % define parameters
+
 df_vec = [3 6]; % degrees of freedom of the NCT
 mu_vec = [0 -1 -2 -3 -4]; % (numerator) non-centrality parameter of the NCT
 theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
+seed = 6; alpha = .1;
+
+% 1. Calculate ES via
+% i) Simulation:
+for df = 1:numel(df_vec)
+    ES_sim = zeros(1,[numel(mu_vec)]);
+    for mu = 1:numel(mu_vec)
+            ES_sim(mu) = Simulated_ES_NCT(1e7, df_vec(df), mu_vec(mu), alpha, seed);
+    end % end mu
+    disp(['Simulation: ', num2str(ES_sim)]);
+
+
+% ii) numeric integration:
+    ES_num = zeros(1,[numel(mu_vec)]);
+    for mu = 1:numel(mu_vec)
+            c01=nctinv(alpha , df_vec(df), mu_vec(mu));
+            I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu));
+            ES_num(mu) = integral(I01 , -Inf , c01) / alpha;
+    end % end mu
+    disp(['Numeric Integration: ', num2str(ES_num)]);
+end
+
+% 2. non-parametric bootstrap
+for df = 1:numel(df_vec)
+    for mu=1:numel(mu_vec)
+        [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df_vec(df), mu_vec(mu)], ES_num(mu), alpha);
+        disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length)]);
+        disp(['Nonparametric Coverage Ratio: with mu = ', num2str(mu_vec(mu)),  ': ' num2str(coverage_ratio)]);
+    end % end mu
+end
+
+% 3. parametric bootstrap based on student t distribution, !!Coverage rate is wrong!!
+for df = 1:numel(df_vec)
+    mle_method = 1;
+    for k = 1:length(n_samp_vec)
+        for mu = 1:numel(mu_vec)
+            for i = 1:reps
+                % generate "T" data points from the noncentral t-dist with "df" degrees of freedom
+                % and location "loc" and scale "scale" and noncentrality parameter "mu" (words in quotes refer to
+                % variables)
+                data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df_vec(df), 1);
+        
+                % 2 methods for MLE (!! second methods gives wrong values!!)
+                % We wrongly assume a t distribution and do MLE
+                % i) matlab function mle
+                if mle_method == 1
+                    para_bs_hat = mle(data, 'Distribution', 'tLocationScale'); % output: [loc scale df]
+                    para_loc_hat = para_bs_hat(1);
+                    para_scale_hat = para_bs_hat(2);
+                    para_df_hat = para_bs_hat(3);
+                % ii) function from book 
+                elseif mle_method == 2
+                    [param, stderr, iters, loglik, Varcov] = tlikmax(data, initvec);
+                    para_loc_hat = param(1);
+                    para_scale_hat = param(2);
+                    para_df_hat = param(3);
+                end
+        
+                % generate parametric bootstrap sample with the estimated parameters
+        
+                for j = 1:n_BS
+                    bs_samp = para_loc_hat + para_scale_hat * trnd(para_df_hat, n_samp_vec(k), 1);
+                    VaR = quantile(bs_samp, alpha);
+                    temp = bs_samp(bs_samp<=VaR);
+                    ES_vec(j) = mean(temp);
+                end
+                ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+                low_para = ci_para(1); high_para = ci_para(2);
+                ci_length_para(i, mu) = high_para - low_para;
+                if ES_LS_analytic >= low_para && ES_LS_analytic <= high_para
+                    coverage_para(i,mu) = 1;
+                end
+            end % end i
+        end % end mu
+        disp(mean(ci_length_para));
+        disp(mean(coverage_para));
+    end % end k
+end % end df
+
+%% exercise 3
+
+
+
+
+
+
+
+
 
