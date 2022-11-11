@@ -54,13 +54,13 @@ coverage = zeros([reps length(n_samp_vec)]);
 rng(6, 'twister')
 
 for k = 1:length(n_samp_vec)
+    disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
     % initialize variables
     %len=zeros(reps,1);
     %coverage=zeros(reps,1);
 
     for i = 1:reps
     % first, generate the true dataset
-
         % (i) symmetric student t
         if dist == 1
             % reset seed (for reproducibility)
@@ -82,7 +82,8 @@ for k = 1:length(n_samp_vec)
         %ESvec=zeros(n_BS,1);
         for j=1:n_BS
             % create bootstrap sample
-            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]); % funktioniert das?
+
+            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
             bs_samp = data(ind);
 
             % calculate ES
@@ -100,7 +101,12 @@ for k = 1:length(n_samp_vec)
         if trueES >= lower_bound && trueES <= upper_bound
             coverage(i, k) = 1;
         end
-    end % end of 'reps' loop
+        
+        % info for user when running function
+        if mod(i, 10) == 0
+            disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
+        end
+    end % i-loop (reps
 end % end of k-loop
 
 average_length = mean(ci_len);
