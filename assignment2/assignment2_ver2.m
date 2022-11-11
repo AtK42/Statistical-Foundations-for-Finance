@@ -326,27 +326,29 @@ n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 seed = 6; alpha = .1;
 
+ES_sim = zeros(numel(tail_index_vec), 1);
+ES_num = zeros(numel(mu_vec), 1);
 
 disp(delim); disp(['ES for different tail indices', newline, 'of the (symmetric) stable distribution']);
 for i = 1:numel(tail_index_vec)
-        disp(delim); disp(['for tail_index = ', num2str(tail_index_vec(i))]);
+
+    disp(delim); disp(['for tail_index = ', num2str(tail_index_vec(i))]);
+
     % (i) Simulation:
-        ES_sim = zeros(numel(mu_vec), 1);
-        for mu = 1:numel(mu_vec)
-                ES_sim(mu, df) = Simulated_ES_symStable(n_samp, tail_index, scale, loc, alpha, seed);
-        end % end mu-loop
-        disp(['via Simulation:          ', num2str(ES_sim(:, df)', '% 7.4f')]);
+    ES_sim(i) = Simulated_ES_symStable(n_samp, tail_index_vec(i), scale, loc, alpha, seed);
 
     % (ii) numeric integration:
-        ES_num = zeros(numel(mu_vec), 1);
-        for mu = 1:numel(mu_vec)
-                c01=nctinv(alpha , df_vec(df), mu_vec(mu));
-                I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
-                ES_num(mu, df) = integral(I01 , -Inf , c01) / alpha;
-        end % end mu-loop
-        disp(['via Numeric Integration: ', num2str(ES_num(:, df)', '% 7.4f')]);
-end % df-loop (for df)
+    %c01=nctinv(alpha , df_vec(df), mu_vec(mu));
+    %I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
+    %ES_num(mu, df) = integral(I01 , -Inf , c01) / alpha;
+    
+    %change to stoyanov
+    
+end % tail_index-loop
+
+disp(['via Simulation:          ', num2str(ES_sim', '% 7.4f')]);
+disp(['via Numeric Integration: ', num2str(ES_num', '% 7.4f')]);
 
 disp(delim);
 struct_ES = struct('ES_sim', ES_sim, 'ES_num', ES_num);
-save('results/ex2_trueES.mat', 'struct_ES');
+save('results/ex3_trueES.mat', 'struct_ES');
