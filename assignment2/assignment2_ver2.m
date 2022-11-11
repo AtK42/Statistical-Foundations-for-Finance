@@ -319,14 +319,21 @@ save('results/ex2_seconddf_len+coverage.mat', 'struct_comb');
 %   (ii) integral definition of the stable for):
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % two different tail_indices:                 |    1.6|    1.8|       |       |
+delim = '************************************';
+loc = 2; scale = 1;
+tail_index_vec = [1.6, 1.8];
+n_samp = 1e7;
+reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+seed = 6; alpha = .1;
+
 
 disp(delim); disp(['ES for different tail indices', newline, 'of the (symmetric) stable distribution']);
-for df = 1:numel(df_vec)
-        disp(delim); disp(['for df = ', num2str(df_vec(df))]);
+for i = 1:numel(tail_index_vec)
+        disp(delim); disp(['for tail_index = ', num2str(tail_index_vec(i))]);
     % (i) Simulation:
         ES_sim = zeros(numel(mu_vec), 1);
         for mu = 1:numel(mu_vec)
-                ES_sim(mu, df) = Simulated_ES_NCT(n_samp, df_vec(df), mu_vec(mu), alpha, seed);
+                ES_sim(mu, df) = Simulated_ES_symStable(n_samp, tail_index, scale, loc, alpha, seed);
         end % end mu-loop
         disp(['via Simulation:          ', num2str(ES_sim(:, df)', '% 7.4f')]);
 
