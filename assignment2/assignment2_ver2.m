@@ -326,29 +326,27 @@ n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 seed = 6; alpha = .1;
 
-ES_sim = zeros(numel(tail_index_vec), 1);
-ES_num = zeros(numel(mu_vec), 1);
+ES_stoy = zeros(numel(tail_index_vec), 1);
+ES_sim = zeros(numel(tail_index_vec), 1); % mümmer glaub ich ned mache 
 
 disp(delim); disp(['ES for different tail indices', newline, 'of the (symmetric) stable distribution']);
 for i = 1:numel(tail_index_vec)
 
     disp(delim); disp(['for tail_index = ', num2str(tail_index_vec(i))]);
 
+    % Calculate true ES of symmetric stable distribution using Stoyanov
+    trueES = asymstableES(alpha , tail_index_vec(i), 0, loc, scale, 1);
+    ES_stoy(i) = trueES;
+
     % (i) Simulation:
     ES_sim(i) = Simulated_ES_symStable(n_samp, tail_index_vec(i), scale, loc, alpha, seed);
-
-    % (ii) numeric integration:
-    %c01=nctinv(alpha , df_vec(df), mu_vec(mu));
-    %I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
-    %ES_num(mu, df) = integral(I01 , -Inf , c01) / alpha;
-    
-    %change to stoyanov
+    disp(['via Stoyanov: ', num2str(trueES', '% 7.4f')]);
+    disp(['via Simulation: ', num2str(ES_sim(i)', '% 7.4f')]);
     
 end % tail_index-loop
 
-disp(['via Simulation:          ', num2str(ES_sim', '% 7.4f')]);
-disp(['via Numeric Integration: ', num2str(ES_num', '% 7.4f')]);
+
 
 disp(delim);
-struct_ES = struct('ES_sim', ES_sim, 'ES_num', ES_num);
-save('results/ex3_trueES.mat', 'struct_ES');
+%struct_ES = struct('ES_stoy', ES_stoy, 'ES_sim', ES_sim);
+%save('results/ex3_trueES.mat', 'struct_ES');
