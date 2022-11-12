@@ -93,7 +93,7 @@ for k = 1:length(n_samp_vec)
     end %i-loop
 end %k-loop
 
-disp('_____');
+disp('***');
 % compare the length of the CIs as a function of the sample size n_samp (= T)
 disp(delim); disp('CI length using');
 disp(["matlab function: ", num2str(mean(ci_length_para),    '% 7.4f')]);
@@ -112,7 +112,7 @@ struct_para = struct('mean_ci_length_para'   , mean(ci_length_para)   , 'ci_leng
 struct_para_MP = struct('mean_ci_length_para_MP', mean(ci_length_para_MP), 'ci_length_para_MP', ci_length_para_MP, 'mean_coverage_para_MP', mean(coverage_para_MP), 'coverage_para_MP', coverage_para_MP);
 
 struct_comb = struct('struct_nonpara', struct_nonpara, 'struct_para', struct_para, 'struct_para_MP', struct_para_MP);
-save('results/ex1.mat', 'struct_comb')
+save('results/ex1_.mat', 'struct_comb')
 %% exercise 2 (simulate from NCT (part 1) & calculate true ES (part 2))
 % define parameters
 delim = '************************************';
