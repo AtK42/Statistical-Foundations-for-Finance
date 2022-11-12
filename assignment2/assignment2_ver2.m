@@ -31,7 +31,7 @@ trueES = ES_LS_analytic;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(delim); disp('non-parametric bootstrap');
 [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 1, [scale, loc, df], trueES, alpha);
-disp('_____');
+disp('***');
 disp(['Average nonparametric CI Length: ', num2str(average_length, '% 7.4f')]);
 disp(['Nonparametric Coverage Ratio:    ', num2str(coverage_ratio, '% 7.4f')]);
 
@@ -113,7 +113,7 @@ struct_para_MP = struct('mean_ci_length_para_MP', mean(ci_length_para_MP), 'ci_l
 
 struct_comb = struct('struct_nonpara', struct_nonpara, 'struct_para', struct_para, 'struct_para_MP', struct_para_MP);
 save('results/ex1.mat', 'struct_comb')
-%% exercise 2 (part 1 [simulate from NCT] & 2 [calculate true ES])
+%% exercise 2 (simulate from NCT (part 1) & calculate true ES (part 2))
 % define parameters
 delim = '************************************';
 n_samp = 1e7;
@@ -166,8 +166,7 @@ save('results/ex2_trueES.mat', 'struct_ES');
 % mu = -2 |        |        |
 % mu = -1 |        |        |
 % mu = 0  |        |        |
-
-%% exercise 2 (part 3 - first df)
+%% exercise 2 (bootstrapping for first df (part 3))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 3 - first df (report average length of CI and actual coverage with both bootstrap methods)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -197,54 +196,58 @@ end % mu-loop
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
 %!!check coverage rate (might be wrong still)!!
-    disp(delim); disp(['for df = ', num2str(df)]);
-    for k = 1:length(n_samp_vec)
-        for mu = 1:numel(mu_vec)
-            for i = 1:reps
-                % generate random sample of a (regular) loc-scale t dist
-                data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df, seed);
-                initvec = [df loc scale]; % [df loc scale]
+disp(delim); disp(['for df = ', num2str(df)]);
+for k = 1:length(n_samp_vec)
+    disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
+    for mu = 1:numel(mu_vec)
+    disp('   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu)));
+        for i = 1:reps
+            % generate random sample of a (regular) loc-scale t dist
+            data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df, seed);
+            initvec = [df loc scale]; % [df loc scale]
 
-                for j = 1:n_BS
+            for j = 1:n_BS
 
-                    % create bootstrap sample
-                    ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
-                    bs_samp = data(ind);
+                % create bootstrap sample
+                ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
+                bs_samp = data(ind);
 
-                    % parametric
-                    %para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
-                    %para_loc_hat = para_bs_hat(1); para_scale_hat = para_bs_hat(2); para_df_hat = para_bs_hat(3);
+                % parametric
+                %para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
+                %para_loc_hat = para_bs_hat(1); para_scale_hat = para_bs_hat(2); para_df_hat = para_bs_hat(3);
 
-                    para_bs_hat = tlikmax(bs_samp, initvec);
-                    para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
+                para_bs_hat = tlikmax(bs_samp, initvec);
+                para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
 
-                    % calculate theoretical ES based on the parameter estimates
-                    c01 = tinv(alpha , para_df_hat);
-                    ES_vec(j) = para_loc_hat + para_scale_hat * (-tpdf(c01,para_df_hat)/tcdf(c01,para_df_hat) * (para_df_hat+c01^2)/(para_df_hat-1));
+                % calculate theoretical ES based on the parameter estimates
+                c01 = tinv(alpha , para_df_hat);
+                ES_vec(j) = para_loc_hat + para_scale_hat * (-tpdf(c01,para_df_hat)/tcdf(c01,para_df_hat) * (para_df_hat+c01^2)/(para_df_hat-1));
 
-                end % j-loop
+            end % j-loop
 
-                % compute length of the CI and coverage
-                ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
-                low_para = ci_para(1); high_para = ci_para(2);
-                ci_length_para(i, k) = high_para - low_para;
-                if ES_num(mu, df) >= low_para && ES_num(mu, df) <= high_para
-                    coverage_para(i, k) = 1;
-                end
+            % compute length of the CI and coverage
+            ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+            low_para = ci_para(1); high_para = ci_para(2);
+            ci_length_para(i, k) = high_para - low_para;
+            if ES_num(mu, df) >= low_para && ES_num(mu, df) <= high_para
+                coverage_para(i, k) = 1;
+            end
 
-            end % i-loop (reps)
-        end % mu-loop
-        disp(mean(ci_length_para));
-        disp(mean(coverage_para));
-    end % k-loop (samp size
-    
-    % save
-    struct_nonpara_firstdf = struct('average_length', average_length, 'coverage_ratio', coverage_ratio);
-    struct_para_seconddf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para));
+            if mod(i, 10) == 0
+                disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
+            end
+        end % i-loop (reps)
+    end % mu-loop
+    disp(mean(ci_length_para));
+    disp(mean(coverage_para));
+end % k-loop (samp size
 
-struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_para_firstdf', struct_para_seconddf);
+% save
+struct_nonpara_firstdf = struct('average_length', average_length, 'coverage_ratio', coverage_ratio);
+struct_para_firstdf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
+struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_para_firstdf', struct_para_firstdf);
 save('results/ex2_firstdf_len+coverage.mat', 'struct_comb');
-%% exercise 2 (part 3 - second df)
+%% exercise 2 (bootstrapping for second df (part 3))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 3 - second df (report average length of CI and actual coverage with both bootstrap methods)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -262,7 +265,7 @@ seed = 6; alpha = .1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-disp(delim); disp(['for df = ', num2str(df)]);
+disp(delim); disp(['ex2: non-parametric bootstrap for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
     [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu), alpha);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
@@ -273,58 +276,62 @@ end % mu-loop
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
 %!!check coverage rate (might be wrong still)!!
-    disp(delim); disp(['for df = ', num2str(df)]);
-    for k = 1:length(n_samp_vec)
-        for mu = 1:numel(mu_vec)
-            for i = 1:reps
-                % generate random sample of a (regular) loc-scale t dist
-                data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df, seed);
-                initvec = [df loc scale]; % [df loc scale]
+disp(delim); disp(['ex2: parametric bootstrap for df = ', num2str(df)]);
+for k = 1:length(n_samp_vec)
+    disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
+    disp('   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu)));
+    for mu = 1:numel(mu_vec)
+        for i = 1:reps
+            % generate random sample of a (regular) loc-scale t dist
+            data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df, seed);
+            initvec = [df loc scale]; % [df loc scale]
 
-                for j = 1:n_BS
+            for j = 1:n_BS
 
-                    % create bootstrap sample
-                    ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
-                    bs_samp = data(ind);
+                % create bootstrap sample
+                ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
+                bs_samp = data(ind);
 
-                    % parametric
-                    %para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
-                    %para_loc_hat = para_bs_hat(1); para_scale_hat = para_bs_hat(2); para_df_hat = para_bs_hat(3);
+                % parametric
+                %para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
+                %para_loc_hat = para_bs_hat(1); para_scale_hat = para_bs_hat(2); para_df_hat = para_bs_hat(3);
 
-                    para_bs_hat = tlikmax(bs_samp, initvec);
-                    para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
+                para_bs_hat = tlikmax(bs_samp, initvec);
+                para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
 
-                    % calculate theoretical ES based on the parameter estimates
-                    c01 = tinv(alpha , para_df_hat);
-                    ES_vec(j) = para_loc_hat + para_scale_hat * (-tpdf(c01,para_df_hat)/tcdf(c01,para_df_hat) * (para_df_hat+c01^2)/(para_df_hat-1));
+                % calculate theoretical ES based on the parameter estimates
+                c01 = tinv(alpha , para_df_hat);
+                ES_vec(j) = para_loc_hat + para_scale_hat * (-tpdf(c01,para_df_hat)/tcdf(c01,para_df_hat) * (para_df_hat+c01^2)/(para_df_hat-1));
 
-                end % j-loop
+            end % j-loop
 
-                % compute length of the CI and coverage
-                ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
-                low_para = ci_para(1); high_para = ci_para(2);
-                ci_length_para(i, k) = high_para - low_para;
-                if ES_num(mu, df) >= low_para && ES_num(mu, df) <= high_para
-                    coverage_para(i, k) = 1;
-                end
+            % compute length of the CI and coverage
+            ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+            low_para = ci_para(1); high_para = ci_para(2);
+            ci_length_para(i, k) = high_para - low_para;
+            if ES_num(mu, df) >= low_para && ES_num(mu, df) <= high_para
+                coverage_para(i, k) = 1;
+            end
+            
+            if mod(i, 10) == 0
+                disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
+            end
+        end % i-loop (reps)
+    end % mu-loop
+    disp(mean(ci_length_para));
+    disp(mean(coverage_para));
+end % k-loop (samp size
 
-            end % i-loop (reps)
-        end % mu-loop
-        disp(mean(ci_length_para));
-        disp(mean(coverage_para));
-    end % k-loop (samp size
-
-    % save
-    struct_nonpara_seconddf = struct('average_length', average_length, 'coverage_ratio', coverage_ratio);
-    struct_para_seconddf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para));
-
+% save
+struct_nonpara_seconddf = struct('average_length', average_length, 'coverage_ratio', coverage_ratio);
+struct_para_seconddf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_seconddf', struct_nonpara_seconddf, 'struct_para_seconddf', struct_para_seconddf);
 save('results/ex2_seconddf_len+coverage.mat', 'struct_comb');
 %% exercise 3 (calculate true ES)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % calculate true ES of the stable dist for the following parameters and via
 %   (i) simulation and 
-%   (ii) integral definition of the stable for):
+%   (ii) Stoyanov (integral definition of the stable) for:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % two different tail_indices:                 |    1.6|    1.8|       |       |
 delim = '************************************';
@@ -333,6 +340,8 @@ tail_index_vec = [1.6, 1.8];
 n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 seed = 6; alpha = .1;
+ci_length_para = zeros([reps length(n_samp_vec)]);
+coverage_para = zeros([reps length(n_samp_vec)]);
 
 ES_sim = zeros(numel(tail_index_vec), 1); % mümmer glaub ich ned mache 
 ES_stoy = zeros(numel(tail_index_vec), 1);
@@ -354,10 +363,172 @@ disp(['via Simulation: ', num2str(ES_sim', ' % .4f')]);
 disp(['via Stoyanov:   ', num2str(ES_stoy', ' % .4f')]);
 
 disp(delim);
-struct_ES = struct('ES_sim', ES_sim, 'ES_stoy', ES_stoy);
+struct_ES = struct('ES_stoy', ES_stoy, 'ES_sim', ES_sim);
 save('results/ex3_trueES.mat', 'struct_ES');
 % struct result:
 %                  |  ...   |
 % tail_index = 1.6 |        |
 % tail_index = 1.8 |        |
+%% exercise 3 (bootstrapping for first tail_index)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% part 2 - (report average length of CI and actual coverage with both bootstrap methods)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % two different tail_indices:                 |    1.6|    1.8|       |       |
+
+delim = '************************************';
+loc = 2; scale = 1;
+tail_index = 1.6; n_tail_index = 1;
+n_samp = 1e7;
+reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+seed = 6;
+alpha = .1;
+dist = 3; % corresponds to the (symmetric) stable dist
+initvec = [2 loc scale]; % [df loc scale]
+
+
+%ci_length_para = zeros([reps length(n_samp_vec)]);
+%coverage_para = zeros([reps length(n_samp_vec)]);
+%ci_length_nonpara = zeros([2 length(n_samp_vec)]);
+%coverage_nonpara = zeros([2 length(n_samp_vec)]);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% non-parametric bootstrap %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+disp(delim); disp(['ex3: non-parametric bootstrap for tail_index = ', num2str(tail_index)]);
+params = [tail_index, scale, loc];
+[average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha);
+disp(['Average nonparametric CI Length: ', num2str(average_length, ' % 7.4f')]);
+disp(['Nonparametric Coverage Ratio:    ', num2str(coverage_ratio, ' % 7.4f')]);
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% parametric bootstrap %
+%%%%%%%%%%%%%%%%%%%%%%%%
+disp(delim); disp(['ex3: parametric bootstrap for tail_index = ', num2str(tail_index)]);
+for k = 1:length(n_samp_vec)
+    disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
+    for i = 1:reps
+        % generate random sample from a (symmetric) stable dist
+        data = stabgen(n_samp_vec(k), tail_index, 0, scale ,loc); %don't set the seed, function takes random one
+        for j = 1:n_BS
+
+            % create bootstrap sample
+            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
+            bs_samp = data(ind);
+
+            % parametric
+            %para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
+            %para_loc_hat = para_bs_hat(1); para_scale_hat = para_bs_hat(2); para_df_hat = para_bs_hat(3);
+
+            para_bs_hat = tlikmax(bs_samp, initvec);
+            para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
+
+            % calculate theoretical ES based on the parameter estimates
+            c01 = tinv(alpha , para_df_hat);
+            ES_vec(j) = para_loc_hat + para_scale_hat * (-tpdf(c01,para_df_hat)/tcdf(c01,para_df_hat) * (para_df_hat+c01^2)/(para_df_hat-1));
+
+        end % j-loop
+
+        % compute length of the CI and coverage
+        ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        low_para = ci_para(1); high_para = ci_para(2);
+        ci_length_para(i, k) = high_para - low_para;
+        if ES_stoy(n_tail_index) >= low_para && ES_stoy(n_tail_index) <= high_para
+            coverage_para(i, k) = 1;
+        end
+
+        if mod(i, 10) == 0
+            disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
+        end
+    end % i-loop (reps)
+end % k-loop (sample size)
+disp(['Average parametric CI Length: ', num2str(ci_length_para, ' % 7.4f')]);
+disp(['parametric Coverage Ratio:    ', num2str(coverage_para, ' % 7.4f')]);
+
+%save 
+struct_nonpara_firsttailindex = struct('average length', average_length, 'coverage_ratio', coverage_ratio);
+struct_para_firrsttailindex = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_ratio_para);
+struct_comb = struct('struct_nonpara_firsttailindex', struct_nonpara_firsttailindex, 'struct_para_firsttailindex', struct_para_firsttailindex);
+save('results/ex3_firsttailindex_len+coverage.mat', 'struct_comb');
+%% exercise 3 (bootstrapping for second tail_index)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% part 2 - (report average length of CI and actual coverage with both bootstrap methods)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % two different tail_indices:                 |    1.6|    1.8|       |       |
+
+delim = '************************************';
+loc = 2; scale = 1;
+tail_index = 1.8; n_tail_index = 2;
+n_samp = 1e7;
+reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+seed = 6;
+alpha = .1;
+dist = 3; % corresponds to the (symmetric) stable dist
+initvec = [2 loc scale]; % [df loc scale]
+
+
+%ci_length_para = zeros([reps length(n_samp_vec)]);
+%coverage_para = zeros([reps length(n_samp_vec)]);
+%ci_length_nonpara = zeros([2 length(n_samp_vec)]);
+%coverage_nonpara = zeros([2 length(n_samp_vec)]);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% non-parametric bootstrap %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+disp(delim); disp(['ex3: non-parametric bootstrap for tail_index = ', num2str(tail_index)]);
+params = [tail_index, scale, loc];
+[average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha);
+disp(['Average nonparametric CI Length: ', num2str(average_length, ' % 7.4f')]);
+disp(['Nonparametric Coverage Ratio:    ', num2str(coverage_ratio, ' % 7.4f')]);
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% parametric bootstrap %
+%%%%%%%%%%%%%%%%%%%%%%%%
+disp(delim); disp(['ex3: parametric bootstrap for tail_index = ', num2str(tail_index)]);
+for k = 1:length(n_samp_vec)
+    disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
+    for i = 1:reps
+        % generate random sample from a (symmetric) stable dist
+        data = stabgen(n_samp_vec(k), tail_index, 0, scale ,loc); %don't set the seed, function takes random one
+        for j = 1:n_BS
+
+            % create bootstrap sample
+            ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
+            bs_samp = data(ind);
+
+            % parametric
+            %para_bs_hat = mle(bs_samp, 'Distribution', 'tLocationScale'); %output: [loc scale df]
+            %para_loc_hat = para_bs_hat(1); para_scale_hat = para_bs_hat(2); para_df_hat = para_bs_hat(3);
+
+            para_bs_hat = tlikmax(bs_samp, initvec);
+            para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
+
+            % calculate theoretical ES based on the parameter estimates
+            c01 = tinv(alpha , para_df_hat);
+            ES_vec(j) = para_loc_hat + para_scale_hat * (-tpdf(c01,para_df_hat)/tcdf(c01,para_df_hat) * (para_df_hat+c01^2)/(para_df_hat-1));
+
+        end % j-loop
+
+        % compute length of the CI and coverage
+        ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        low_para = ci_para(1); high_para = ci_para(2);
+        ci_length_para(i, k) = high_para - low_para;
+        if ES_stoy(n_tail_index) >= low_para && ES_stoy(n_tail_index) <= high_para
+            coverage_para(i, k) = 1;
+        end
+
+        if mod(i, 10) == 0
+            disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
+        end
+    end % i-loop (reps)
+end % k-loop (sample size)
+disp(['Average parametric CI Length: ', num2str(ci_length_para, ' % 7.4f')]);
+disp(['parametric Coverage Ratio:    ', num2str(coverage_para, ' % 7.4f')]);
+
+%save 
+struct_nonpara_secondtailindex = struct('average length', average_length, 'coverage_ratio', coverage_ratio);
+struct_para_secondtailindex = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_ratio_para);
+struct_comb = struct('struct_nonpara_secondtailindex', struct_nonpara_secondtailindex, 'struct_para_secondtailindex', struct_para_secondtailindex);
+save('results/ex3_secondtailindex_len+coverage.mat', 'struct_comb');
+%% exercise 4
