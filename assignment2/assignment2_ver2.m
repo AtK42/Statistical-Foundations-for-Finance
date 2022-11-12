@@ -117,7 +117,7 @@ save('results/ex1.mat', 'struct_comb')
 % define parameters
 delim = '************************************';
 n_samp = 1e7;
-reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+%reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df_vec = [3 6]; % degrees of freedom of the NCT
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
@@ -136,18 +136,19 @@ seed = 6; alpha = .1;
 % % two different df:                           |    3|    6|     |     |
 % % four different asymmetry parameters (mu):   |   -3|   -2|   -1|    0|
 
+ES_sim = zeros(numel(mu_vec), numel(df_vec));
+ES_num = zeros(numel(mu_vec), numel(df_vec));
+
 disp(delim); disp(['ES for different df and non-centrality', newline, 'parameters of the NCT (mu)']);
 for df = 1:numel(df_vec)
         disp(delim); disp(['for df = ', num2str(df_vec(df))]);
     % (i) Simulation:
-        ES_sim = zeros(numel(mu_vec), 1);
         for mu = 1:numel(mu_vec)
                 ES_sim(mu, df) = Simulated_ES_NCT(n_samp, df_vec(df), mu_vec(mu), alpha, seed);
         end % end mu-loop
         disp(['via Simulation:          ', num2str(ES_sim(:, df)', '% 7.4f')]);
 
     % (ii) numeric integration:
-        ES_num = zeros(numel(mu_vec), 1);
         for mu = 1:numel(mu_vec)
                 c01=nctinv(alpha , df_vec(df), mu_vec(mu));
                 I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
@@ -159,6 +160,13 @@ end % df-loop (for df)
 disp(delim);
 struct_ES = struct('ES_sim', ES_sim, 'ES_num', ES_num);
 save('results/ex2_trueES.mat', 'struct_ES');
+% struct result:
+%         | df = 3 | df = 6 |
+% mu = -3 |        |        |
+% mu = -2 |        |        |
+% mu = -1 |        |        |
+% mu = 0  |        |        |
+
 %% exercise 2 (part 3 - first df)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 3 - first df (report average length of CI and actual coverage with both bootstrap methods)
@@ -326,27 +334,30 @@ n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 seed = 6; alpha = .1;
 
-ES_stoy = zeros(numel(tail_index_vec), 1);
 ES_sim = zeros(numel(tail_index_vec), 1); % mümmer glaub ich ned mache 
+ES_stoy = zeros(numel(tail_index_vec), 1);
 
-disp(delim); disp(['ES for different tail indices', newline, 'of the (symmetric) stable distribution']);
+disp(delim); disp(['ES for different tail indices', newline, 'of the (symmetric) stable distribution']); disp('***');
 for i = 1:numel(tail_index_vec)
 
-    disp(delim); disp(['for tail_index = ', num2str(tail_index_vec(i))]);
-
-    % Calculate true ES of symmetric stable distribution using Stoyanov
-    trueES = asymstableES(alpha , tail_index_vec(i), 0, loc, scale, 1);
-    ES_stoy(i) = trueES;
+    disp(['calculating for tail_index = ', num2str(tail_index_vec(i))]);
 
     % (i) Simulation:
     ES_sim(i) = Simulated_ES_symStable(n_samp, tail_index_vec(i), scale, loc, alpha, seed);
-    disp(['via Stoyanov: ', num2str(trueES', '% 7.4f')]);
-    disp(['via Simulation: ', num2str(ES_sim(i)', '% 7.4f')]);
-    
-end % tail_index-loop
 
-
+    % (ii) Stoyanov
+    ES_stoy(i) = asymstableES(alpha , tail_index_vec(i), 0, loc, scale, 1);
+end % i-loop (tail_index)
 
 disp(delim);
-%struct_ES = struct('ES_stoy', ES_stoy, 'ES_sim', ES_sim);
-%save('results/ex3_trueES.mat', 'struct_ES');
+disp(['via Simulation: ', num2str(ES_sim', ' % .4f')]);
+disp(['via Stoyanov:   ', num2str(ES_stoy', ' % .4f')]);
+
+disp(delim);
+struct_ES = struct('ES_sim', ES_sim, 'ES_stoy', ES_stoy);
+save('results/ex3_trueES.mat', 'struct_ES');
+% struct result:
+%                  |  ...   |
+% tail_index = 1.6 |        |
+% tail_index = 1.8 |        |
+
