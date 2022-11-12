@@ -1,4 +1,5 @@
 %% exercise 1 (from first mail, 26.10.2022)
+tic
 % define parameters
 delim = '************************************';
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
@@ -30,10 +31,10 @@ trueES = ES_LS_analytic;
 % nonparametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(delim); disp('non-parametric bootstrap');
-[average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 1, [scale, loc, df], trueES, alpha);
+[ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 1, [scale, loc, df], trueES, alpha);
 disp('***');
 disp(['Average nonparametric CI Length: ', num2str(average_length, '% 7.4f')]);
-disp(['Nonparametric Coverage Ratio:    ', num2str(coverage_ratio, '% 7.4f')]);
+disp(['Nonparametric Coverage Ratio:    ', num2str(mean_coverage_ratio, '% 7.4f')]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
@@ -107,12 +108,18 @@ disp(["MP's function:   ", num2str(mean(coverage_para_MP), '% 7.4f')]);
 disp(delim);
 
 % save output
-struct_nonpara = struct('average_length', average_length, 'coverage_ratio', coverage_ratio);
+struct_nonpara = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
 struct_para = struct('mean_ci_length_para'   , mean(ci_length_para)   , 'ci_length_para'   , ci_length_para   , 'mean_coverage_para'   , mean(coverage_para)   , 'coverage_para'   , coverage_para);
 struct_para_MP = struct('mean_ci_length_para_MP', mean(ci_length_para_MP), 'ci_length_para_MP', ci_length_para_MP, 'mean_coverage_para_MP', mean(coverage_para_MP), 'coverage_para_MP', coverage_para_MP);
-
 struct_comb = struct('struct_nonpara', struct_nonpara, 'struct_para', struct_para, 'struct_para_MP', struct_para_MP);
-save('results/ex1_.mat', 'struct_comb')
+save('results/ex1.mat', 'struct_comb')
+
+% struct
+%         | n_samp = 250 | n_samp = 500 | n_samp = 2000 |
+%   ...   |              |              |               |
+
+toc
+disp(delim); disp(delim); time_ex1 = toc - tic; disp(time_ex1);
 %% exercise 2 (simulate from NCT (part 1) & calculate true ES (part 2))
 % define parameters
 delim = '************************************';
@@ -187,9 +194,9 @@ alpha = .1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu), alpha);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
-    disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(coverage_ratio, '% 7.4f')]);
+    disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
 end % mu-loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -243,7 +250,7 @@ for k = 1:length(n_samp_vec)
 end % k-loop (samp size
 
 % save
-struct_nonpara_firstdf = struct('average_length', average_length, 'coverage_ratio', coverage_ratio);
+struct_nonpara_firstdf = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
 struct_para_firstdf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_para_firstdf', struct_para_firstdf);
 save('results/ex2_firstdf_len+coverage.mat', 'struct_comb');
@@ -267,9 +274,9 @@ seed = 6; alpha = .1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['ex2: non-parametric bootstrap for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu), alpha);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
-    disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(coverage_ratio, '% 7.4f')]);
+    disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
 end % mu-loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -323,7 +330,7 @@ for k = 1:length(n_samp_vec)
 end % k-loop (samp size
 
 % save
-struct_nonpara_seconddf = struct('average_length', average_length, 'coverage_ratio', coverage_ratio);
+struct_nonpara_seconddf = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
 struct_para_seconddf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_seconddf', struct_nonpara_seconddf, 'struct_para_seconddf', struct_para_seconddf);
 save('results/ex2_seconddf_len+coverage.mat', 'struct_comb');
@@ -397,9 +404,9 @@ initvec = [2 loc scale]; % [df loc scale]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['ex3: non-parametric bootstrap for tail_index = ', num2str(tail_index)]);
 params = [tail_index, scale, loc];
-[average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha);
+[ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha);
 disp(['Average nonparametric CI Length: ', num2str(average_length, ' % 7.4f')]);
-disp(['Nonparametric Coverage Ratio:    ', num2str(coverage_ratio, ' % 7.4f')]);
+disp(['Nonparametric Coverage Ratio:    ', num2str(mean_coverage_ratio, ' % 7.4f')]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
@@ -446,7 +453,7 @@ disp(['Average parametric CI Length: ', num2str(ci_length_para, ' % 7.4f')]);
 disp(['parametric Coverage Ratio:    ', num2str(coverage_para, ' % 7.4f')]);
 
 %save 
-struct_nonpara_firsttailindex = struct('average length', average_length, 'coverage_ratio', coverage_ratio);
+struct_nonpara_firsttailindex = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
 struct_para_firrsttailindex = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_ratio_para);
 struct_comb = struct('struct_nonpara_firsttailindex', struct_nonpara_firsttailindex, 'struct_para_firsttailindex', struct_para_firsttailindex);
 save('results/ex3_firsttailindex_len+coverage.mat', 'struct_comb');
@@ -478,9 +485,9 @@ initvec = [2 loc scale]; % [df loc scale]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['ex3: non-parametric bootstrap for tail_index = ', num2str(tail_index)]);
 params = [tail_index, scale, loc];
-[average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha);
+[ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha);
 disp(['Average nonparametric CI Length: ', num2str(average_length, ' % 7.4f')]);
-disp(['Nonparametric Coverage Ratio:    ', num2str(coverage_ratio, ' % 7.4f')]);
+disp(['Nonparametric Coverage Ratio:    ', num2str(mean_coverage_ratio, ' % 7.4f')]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
@@ -527,7 +534,7 @@ disp(['Average parametric CI Length: ', num2str(ci_length_para, ' % 7.4f')]);
 disp(['parametric Coverage Ratio:    ', num2str(coverage_para, ' % 7.4f')]);
 
 %save 
-struct_nonpara_secondtailindex = struct('average length', average_length, 'coverage_ratio', coverage_ratio);
+struct_nonpara_secondtailindex = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
 struct_para_secondtailindex = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_ratio_para);
 struct_comb = struct('struct_nonpara_secondtailindex', struct_nonpara_secondtailindex, 'struct_para_secondtailindex', struct_para_secondtailindex);
 save('results/ex3_secondtailindex_len+coverage.mat', 'struct_comb');
