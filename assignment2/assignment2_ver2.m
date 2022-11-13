@@ -194,6 +194,17 @@ mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 seed = 6;
 alpha = .1;
 
+ci_length_para = cat(4, ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
+coverage_para = cat(4, ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -240,9 +251,9 @@ for k = 1:length(n_samp_vec)
             % compute length of the CI and coverage
             ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
             low_para = ci_para(1); high_para = ci_para(2);
-            ci_length_para(i, k) = high_para - low_para;
+            ci_length_para(i, k, mu) = high_para - low_para;
             if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
-                coverage_para(i, k) = 1;
+                coverage_para(i, k, mu) = 1;
             end
 
             if mod(i, 10) == 0
@@ -278,6 +289,17 @@ n_df = 2;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 seed = 6; alpha = .1;
+
+ci_length_para = cat(4, ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
+coverage_para = cat(4, ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-parametric bootstrap %
@@ -325,9 +347,9 @@ for k = 1:length(n_samp_vec)
             % compute length of the CI and coverage
             ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
             low_para = ci_para(1); high_para = ci_para(2);
-            ci_length_para(i, k) = high_para - low_para;
+            ci_length_para(i, k, mu) = high_para - low_para;
             if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
-                coverage_para(i, k) = 1;
+                coverage_para(i, k, mu) = 1;
             end
             
             if mod(i, 10) == 0
@@ -337,7 +359,7 @@ for k = 1:length(n_samp_vec)
     end % mu-loop
     disp(mean(ci_length_para));
     disp(mean(coverage_para));
-end % k-loop (samp size
+end % k-loop (samp size)
 
 % save
 struct_nonpara_seconddf = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
