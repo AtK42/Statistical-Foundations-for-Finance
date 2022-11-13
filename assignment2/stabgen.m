@@ -3,8 +3,8 @@ function x=stabgen(nobs,a,b,c,d,seed)
 if nargin<3 , b=0; end, if nargin<4 , c=1; end
 if nargin<5 , d=0; end, if nargin<6 , seed=rand*1000; end
 z=nobs;
-rng('twister', seed), V=unifrnd(-pi/2, pi/2, 1, z);
-rng('twister', seed+42), W=exprnd(1, 1, z);
+rng(seed, 'twister'), V=unifrnd(-pi/2, pi/2, 1, z);
+rng(seed+42, 'twister'), W=exprnd(1, 1, z);
 if a==1
     x=(2/pi)*(((pi/2)+b*V).*tan(V)-b*log((W.*cos(V))./((pi/2)+b*V)));
     x=c*x+d-(2/pi)*d*log(d)*c*b;

@@ -1,4 +1,4 @@
-function [average_length, coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, trueES, alpha)
+function [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, trueES, alpha)
 % function to calculate the non-parametric CI
 
 % input parameters:
@@ -109,8 +109,10 @@ for k = 1:length(n_samp_vec)
     end % i-loop (reps
 end % end of k-loop
 
+ci_length = ci_len;
+coverage_ratio = coverage;
 average_length = mean(ci_len);
-coverage_ratio = mean(coverage);
+mean_coverage_ratio = mean(coverage);
 
 end % end of function
 
