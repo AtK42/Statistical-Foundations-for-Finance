@@ -119,8 +119,9 @@ save('results/ex1.mat', 'struct_comb')
 %   ...   |              |              |               |
 
 toc
-disp(delim); disp(delim); time_ex1 = toc - tic; disp(time_ex1);
+disp(delim); disp(delim); time_ex1 = toc - tic; disp(time_ex1); %took 16267.616772 seconds
 %% exercise 2 (simulate from NCT (part 1) & calculate true ES (part 2))
+tic
 % define parameters
 delim = '************************************';
 n_samp = 1e7;
@@ -173,6 +174,8 @@ save('results/ex2_trueES.mat', 'struct_ES');
 % mu = -2 |        |        |
 % mu = -1 |        |        |
 % mu = 0  |        |        |
+toc
+disp(delim); disp(delim);  %took 20.562306 seconds
 %% exercise 2 (bootstrapping for first df (part 3))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 3 - first df (report average length of CI and actual coverage with both bootstrap methods)
@@ -180,10 +183,12 @@ save('results/ex2_trueES.mat', 'struct_ES');
 % % two different df:                           |    3|    6|     |     |
 % % three different sample sizes (n_samp):      |  250|  500| 2000|     |
 % % four different asymmetry parameters (mu):   |   -3|   -2|   -1|    0|
+tic
 delim = '************************************';
 loc = 2; scale = 1;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
+n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 seed = 6;
@@ -207,7 +212,7 @@ disp(delim); disp(['for df = ', num2str(df)]);
 for k = 1:length(n_samp_vec)
     disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
     for mu = 1:numel(mu_vec)
-    disp('   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu)));
+    disp(['   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu))]);
         for i = 1:reps
             % generate random sample of a (regular) loc-scale t dist
             data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df, seed);
@@ -236,7 +241,7 @@ for k = 1:length(n_samp_vec)
             ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
             low_para = ci_para(1); high_para = ci_para(2);
             ci_length_para(i, k) = high_para - low_para;
-            if ES_num(mu, df) >= low_para && ES_num(mu, df) <= high_para
+            if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
                 coverage_para(i, k) = 1;
             end
 
@@ -254,6 +259,9 @@ struct_nonpara_firstdf = struct('average_length', average_length, 'ci_length', c
 struct_para_firstdf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_para_firstdf', struct_para_firstdf);
 save('results/ex2_firstdf_len+coverage.mat', 'struct_comb');
+
+toc
+disp(delim); disp(delim);  %took seconds
 %% exercise 2 (bootstrapping for second df (part 3))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 3 - second df (report average length of CI and actual coverage with both bootstrap methods)
@@ -261,10 +269,12 @@ save('results/ex2_firstdf_len+coverage.mat', 'struct_comb');
 % % two different df:                           |    3|    6|     |     |
 % % three different sample sizes (n_samp):      |  250|  500| 2000|     |
 % % four different asymmetry parameters (mu):   |   -3|   -2|   -1|    0|
+tic
 delim = '************************************';
 loc = 2; scale = 1;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df = 6; % degrees of freedom of the NCT
+n_df = 2;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 seed = 6; alpha = .1;
@@ -286,7 +296,7 @@ end % mu-loop
 disp(delim); disp(['ex2: parametric bootstrap for df = ', num2str(df)]);
 for k = 1:length(n_samp_vec)
     disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
-    disp('   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu)));
+    disp(['   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu))]);
     for mu = 1:numel(mu_vec)
         for i = 1:reps
             % generate random sample of a (regular) loc-scale t dist
@@ -316,7 +326,7 @@ for k = 1:length(n_samp_vec)
             ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
             low_para = ci_para(1); high_para = ci_para(2);
             ci_length_para(i, k) = high_para - low_para;
-            if ES_num(mu, df) >= low_para && ES_num(mu, df) <= high_para
+            if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
                 coverage_para(i, k) = 1;
             end
             
@@ -334,6 +344,9 @@ struct_nonpara_seconddf = struct('average_length', average_length, 'ci_length', 
 struct_para_seconddf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_seconddf', struct_nonpara_seconddf, 'struct_para_seconddf', struct_para_seconddf);
 save('results/ex2_seconddf_len+coverage.mat', 'struct_comb');
+
+toc
+disp(delim); disp(delim);  %took seconds
 %% exercise 3 (calculate true ES)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % calculate true ES of the stable dist for the following parameters and via
@@ -341,6 +354,7 @@ save('results/ex2_seconddf_len+coverage.mat', 'struct_comb');
 %   (ii) Stoyanov (integral definition of the stable) for:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % two different tail_indices:                 |    1.6|    1.8|       |       |
+tic
 delim = '************************************';
 loc = 2; scale = 1;
 tail_index_vec = [1.6, 1.8];
@@ -376,13 +390,16 @@ save('results/ex3_trueES.mat', 'struct_ES');
 %                  |  ...   |
 % tail_index = 1.6 |        |
 % tail_index = 1.8 |        |
+
+toc
+disp(delim); disp(delim);  %took seconds
 %% exercise 3 (bootstrapping for first tail_index)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 2 - (report average length of CI and actual coverage with both bootstrap methods)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % two different tail_indices:                 |    1.6|    1.8|       |       |
-
+tic
 delim = '************************************';
 loc = 2; scale = 1;
 tail_index = 1.6; n_tail_index = 1;
@@ -457,13 +474,16 @@ struct_nonpara_firsttailindex = struct('average_length', average_length, 'ci_len
 struct_para_firrsttailindex = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_ratio_para);
 struct_comb = struct('struct_nonpara_firsttailindex', struct_nonpara_firsttailindex, 'struct_para_firsttailindex', struct_para_firsttailindex);
 save('results/ex3_firsttailindex_len+coverage.mat', 'struct_comb');
+
+toc
+disp(delim); disp(delim);  %took seconds
 %% exercise 3 (bootstrapping for second tail_index)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 2 - (report average length of CI and actual coverage with both bootstrap methods)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % two different tail_indices:                 |    1.6|    1.8|       |       |
-
+tic
 delim = '************************************';
 loc = 2; scale = 1;
 tail_index = 1.8; n_tail_index = 2;
@@ -538,4 +558,7 @@ struct_nonpara_secondtailindex = struct('average_length', average_length, 'ci_le
 struct_para_secondtailindex = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_ratio_para);
 struct_comb = struct('struct_nonpara_secondtailindex', struct_nonpara_secondtailindex, 'struct_para_secondtailindex', struct_para_secondtailindex);
 save('results/ex3_secondtailindex_len+coverage.mat', 'struct_comb');
+
+toc
+disp(delim); disp(delim);  %took seconds
 %% exercise 4
