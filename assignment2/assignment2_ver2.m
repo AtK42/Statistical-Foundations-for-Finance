@@ -128,7 +128,7 @@ n_samp = 1e7;
 %reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df_vec = [3 6]; % degrees of freedom of the NCT
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
-theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
+%theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 seed = rand*1000; alpha = .1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -532,7 +532,6 @@ tic
 delim = '************************************';
 loc = 2; scale = 1;
 tail_index = 1.8; n_tail_index = 2;
-n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 %seed = rand*1000;
 alpha = .1;
