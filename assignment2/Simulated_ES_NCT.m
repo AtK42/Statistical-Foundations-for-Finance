@@ -1,4 +1,4 @@
-function ES_sim = Simulated_ES_NCT(n_samp, df, mu, alpha, loc, scale, seed)
+function ES_sim = Simulated_ES_NCT(n_samp, df, mu, alpha, seed)
 
 % function to calculate the ES of a NCT distribution via Simulation. 
 % Returns a value for the ES
