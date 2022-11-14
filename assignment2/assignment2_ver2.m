@@ -186,7 +186,7 @@ disp(delim); disp(delim);  %took 20.562306 seconds
 tic
 delim = '************************************';
 loc = 2; scale = 1;
-reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+reps = 50; n_samp_vec = [250 500 2000]; n_BS = 200; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
 n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
@@ -221,13 +221,13 @@ coverage_para = cat(4, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu, n_df), alpha);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
     ci_length_nonpara(:, :, mu) = ci_length;
     coverage_ratio_nonpara(:, :, mu) = coverage_ratio;
 end % mu-loop
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -239,7 +239,7 @@ for k = 1:length(n_samp_vec)
     disp(['   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu))]);
         for i = 1:reps
             % generate random sample of a (regular) loc-scale t dist
-            data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df, seed);
+            data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df);
             initvec = [df loc scale]; % [df loc scale]
 
             for j = 1:n_BS
@@ -266,6 +266,7 @@ for k = 1:length(n_samp_vec)
             low_para = ci_para(1); high_para = ci_para(2);
             ci_length_para(i, k, mu) = high_para - low_para;
             if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
+                disp(1);
                 coverage_para(i, k, mu) = 1;
             end
 
@@ -282,7 +283,8 @@ end % k-loop (samp size
 struct_nonpara_firstdf = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
 struct_para_firstdf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_para_firstdf', struct_para_firstdf);
-save('results/ex2_firstdf_len+coverage.mat', 'struct_comb');
+% save('results/ex2_firstdf_len+coverage.mat', 'struct_comb');
+save('ex2_firstdf_len+coverage.mat', 'struct_comb');
 
 toc
 disp(delim); disp(delim);  %took seconds
@@ -325,18 +327,19 @@ coverage_para = cat(4, ...
                        zeros([reps numel(n_samp_vec)]), ...
                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['ex2: non-parametric bootstrap for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu, n_df), alpha);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
     ci_length_nonpara(:, :, mu) = ci_length;
     coverage_ratio_nonpara(:, :, mu) = coverage_ratio;
 end % mu-loop
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -348,7 +351,7 @@ for k = 1:length(n_samp_vec)
     for mu = 1:numel(mu_vec)
         for i = 1:reps
             % generate random sample of a (regular) loc-scale t dist
-            data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df, seed);
+            data = loc + scale * asymtrnd(n_samp_vec(k), mu_vec(mu), df);
             initvec = [df loc scale]; % [df loc scale]
 
             for j = 1:n_BS
