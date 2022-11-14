@@ -11,7 +11,7 @@ function [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonp
 %               (iii)   the symmetric stable (case 3)
 % % params      paremeter specifications for the true distribution and what the true ES would be
 %               (i)     the symmetric student t:    param = [scale, location, df]
-%               (ii)    the asymmetric student t:   param = [df, mu]
+%               (ii)    the asymmetric student t:   param = [sacle, location, df, mu]
 %               (iii)   the symmetric stable:       param = [a, scale, location]
 
 % output:       a vector with 
@@ -31,7 +31,7 @@ elseif dist == 2
         error("'params' should be a double 1x2 vector where 'params(1)' is the degrees of freedom and 'params(2)' is the (numerator) non-centrality parameter")
     end
     % define each element of the params vector into a separate variable
-    df = params(1); mu = params(2);
+    scale = params(1); loc = params(2); df = params(3); mu = params(4);
 elseif dist == 3
     % check whether user input is valid
     if length(params) ~= 3 && isa(params, 'double') ~= 1
@@ -71,7 +71,7 @@ for k = 1:length(n_samp_vec)
         % (ii) assymetric student t
         elseif dist == 2
             % generate the random sample
-            data = asymtrnd(n_samp_vec(k), mu, df); % do not set a seed! Function creates random seeds
+            data = loc + scale * asymtrnd(n_samp_vec(k), mu, df); % do not set a seed! Function creates random seeds
 
         % (iii) symmetric stable
         elseif dist == 3
