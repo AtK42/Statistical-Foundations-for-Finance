@@ -1,9 +1,9 @@
 function[param,stderr,iters,loglik,Varcov]=tlikmax(x,initvec)
 
 %%%%%%%%      df    mu    c
-bound.lo=   [  1    1     0.01  ];
-bound.hi=   [100    1   100     ];
-bound.which=[  1    0     1     ];
+bound.lo=   [  1    0     0.01  ];
+bound.hi=   [100    10   100     ];
+bound.which=[  1    1     1     ];
 %In this case , as bound . which for mu is zero , mu will not be
 %restricted. As such, the values for .lo and .hi are irrelevant
 %listing 4.6

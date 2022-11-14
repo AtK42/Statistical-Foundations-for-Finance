@@ -185,7 +185,7 @@ disp(delim); disp(delim);  %took 20.562306 seconds
 % % four different asymmetry parameters (mu):   |   -3|   -2|   -1|    0|
 tic
 delim = '************************************';
-loc = 1; scale = 2;
+loc = 2; scale = 2;
 reps = 20; n_samp_vec = [250 500 2000]; n_BS = 200; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
 n_df = 1;
@@ -194,8 +194,8 @@ mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 % seed = rand*1000;
 alpha = .1;
 
-ci_length = zeros([reps numel(n_samp_vec)]);
-coverage = zeros([reps numel(n_samp_vec)]);
+%ci_length = zeros([reps numel(n_samp_vec)]);
+%coverage = zeros([reps numel(n_samp_vec)]);
 
 ci_length_nonpara = zeros(numel(mu), reps, numel(n_samp_vec));
 coverage_ratio_nonpara = zeros(numel(mu), reps, numel(n_samp_vec));
