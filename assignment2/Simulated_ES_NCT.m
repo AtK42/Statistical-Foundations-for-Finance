@@ -10,7 +10,7 @@ function ES_sim = Simulated_ES_NCT(n_samp, df, mu, alpha, loc, scale, seed)
 % % alpha: probability level for ES
 % % seed: random seed for reproducability
 
-X = loc + scale * asymtrnd(n_samp, mu, df, seed);
+X = asymtrnd(n_samp, mu, df, seed);
 VaR = quantile(X, alpha);
 Plo = X(X < VaR);
 ES_sim = mean(Plo);
