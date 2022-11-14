@@ -1,4 +1,4 @@
-function ES_sim = Simulated_ES_NCT(n_samp, df, mu, alpha, seed)
+function ES_sim = Simulated_ES_NCT(n_samp, df, mu, alpha, loc, scale, seed)
 
 % function to calculate the ES of a NCT distribution via Simulation. 
 % Returns a value for the ES
@@ -10,7 +10,7 @@ function ES_sim = Simulated_ES_NCT(n_samp, df, mu, alpha, seed)
 % % alpha: probability level for ES
 % % seed: random seed for reproducability
 
-X = asymtrnd(n_samp, mu, df, seed);
+X = loc + scale * asymtrnd(n_samp, mu, df, seed);
 VaR = quantile(X, alpha);
 Plo = X(X < VaR);
 ES_sim = mean(Plo);
