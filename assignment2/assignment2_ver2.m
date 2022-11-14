@@ -203,6 +203,8 @@ ci_length_para = zeros(numel(mu), reps, numel(n_samp_vec));
 coverage_para = zeros(numel(mu), reps, numel(n_samp_vec));
 
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -261,7 +263,7 @@ for k = 1:length(n_samp_vec)
             end
         end % i-loop (reps)
     end % mu-loop
-        
+
     %disp(mean(ci_length_para));
     %disp(mean(coverage_para));
 end % k-loop (samp size)
