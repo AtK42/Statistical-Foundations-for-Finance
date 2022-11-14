@@ -260,10 +260,6 @@ for k = 1:length(n_samp_vec)
                 disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
             end
         end % i-loop (reps)
-
-    %ci_length_para(:,:,mu) = ci_length;
-    %coverage_para(:,:,mu) = coverage;
-
     end % mu-loop
         
     %disp(mean(ci_length_para));
@@ -362,12 +358,13 @@ for k = 1:length(n_samp_vec)
             end
         end % i-loop (reps)
     end % mu-loop
-    disp(mean(ci_length_para));
-    disp(mean(coverage_para));
+    
+    %disp(mean(ci_length_para));
+    %disp(mean(coverage_para));
 end % k-loop (samp size)
 
 % save
-struct_nonpara_seconddf = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
+struct_nonpara_seconddf = struct('average_length', mean(ci_length_nonpara), 'ci_length', ci_length_nonpara, 'mean_coverage_ratio', mean(coverage_ratio_nonpara), 'coverage_ratio', coverage_ratio_nonpara);
 struct_para_seconddf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_seconddf', struct_nonpara_seconddf, 'struct_para_seconddf', struct_para_seconddf);
 save('results/ex2_seconddf_len+coverage.mat', 'struct_comb');
