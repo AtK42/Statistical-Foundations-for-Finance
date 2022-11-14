@@ -120,7 +120,7 @@ save('results/ex1.mat', 'struct_comb')
 
 toc
 disp(delim); disp(delim); time_ex1 = toc - tic; disp(time_ex1); %took 16267.616772 seconds
-%% exercise 2 (simulate from NCT (part 1) & calculate true ES (part 2))
+%% exercise 2 (simulate from NCT (part 1) & calculate true ES of NCT (part 2))
 tic
 % define parameters
 delim = '************************************';
@@ -398,7 +398,7 @@ save('results/ex2_seconddf_len+coverage.mat', 'struct_comb');
 
 toc
 disp(delim); disp(delim);  %took seconds
-%% exercise 3 (calculate true ES)
+%% exercise 3 (calculate true ES of stable)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % calculate true ES of the stable dist for the following parameters and via
 %   (i) simulation and 
@@ -410,10 +410,8 @@ delim = '************************************';
 loc = 2; scale = 1;
 tail_index_vec = [1.6, 1.8];
 n_samp = 1e8;
-reps = 200; n_samp_vec = [250 500 2000]; %n_BS = 1000; % note that n_samp = T
+%reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 seed = rand*1000; alpha = .1;
-ci_length_para = zeros([reps length(n_samp_vec)]);
-coverage_para = zeros([reps length(n_samp_vec)]);
 
 ES_sim = zeros(numel(tail_index_vec), 1); % mümmer glaub ich ned mache 
 ES_stoy = zeros(numel(tail_index_vec), 1);
@@ -454,18 +452,14 @@ tic
 delim = '************************************';
 loc = 2; scale = 1;
 tail_index = 1.6; n_tail_index = 1;
-n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 %seed = rand*1000;
 alpha = .1;
 dist = 3; % corresponds to the (symmetric) stable dist
 initvec = [2 loc scale]; % [df loc scale]
 
-
 ci_length_para = zeros([reps length(n_samp_vec)]);
 coverage_para = zeros([reps length(n_samp_vec)]);
-ci_length_nonpara = zeros([2 length(n_samp_vec)]);
-coverage_nonpara = zeros([2 length(n_samp_vec)]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-parametric bootstrap %
@@ -540,16 +534,13 @@ loc = 2; scale = 1;
 tail_index = 1.8; n_tail_index = 2;
 n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
-seed = rand*1000;
+%seed = rand*1000;
 alpha = .1;
 dist = 3; % corresponds to the (symmetric) stable dist
 initvec = [2 loc scale]; % [df loc scale]
 
-
 ci_length_para = zeros([reps length(n_samp_vec)]);
 coverage_para = zeros([reps length(n_samp_vec)]);
-ci_length_nonpara = zeros([2 length(n_samp_vec)]);
-coverage_nonpara = zeros([2 length(n_samp_vec)]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-parametric bootstrap %
@@ -612,7 +603,63 @@ save('ex3_secondtailindex_len+coverage.mat', 'struct_comb');
 
 toc
 disp(delim); disp(delim);  %took seconds
-%% exercise 4
+%% exercise 4 (calculate true ES of NCT (duplicate of part 2 in ex2))
+tic
+% define parameters
+delim = '************************************';
+n_samp = 1e7;
+%reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+df_vec = [3 6]; % degrees of freedom of the NCT
+mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
+theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
+seed = rand*1000; alpha = .1;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% part 1 (learn how to simulate from non-central location-scale t)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% see function asymtrnd
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% part 2 (calculate true ES of the NTC for the following parameters and via
+%   (i) simulation and 
+%   (ii) integral definition of the NTC for):
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % two different df:                           |    3|    6|     |     |
+% % four different asymmetry parameters (mu):   |   -3|   -2|   -1|    0|
+
+ES_sim = zeros(numel(mu_vec), numel(df_vec));
+ES_num = zeros(numel(mu_vec), numel(df_vec));
+
+disp(delim); disp(['ES for different df and non-centrality', newline, 'parameters of the NCT (mu)']);
+for df = 1:numel(df_vec)
+        disp(delim); disp(['for df = ', num2str(df_vec(df))]);
+    % (i) Simulation:
+        for mu = 1:numel(mu_vec)
+                ES_sim(mu, df) = Simulated_ES_NCT(n_samp, df_vec(df), mu_vec(mu), alpha, seed);
+        end % end mu-loop
+        disp(['via Simulation:          ', num2str(ES_sim(:, df)', '% 7.4f')]);
+
+    % (ii) numeric integration:
+        for mu = 1:numel(mu_vec)
+                c01=nctinv(alpha , df_vec(df), mu_vec(mu));
+                I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
+                ES_num(mu, df) = integral(I01 , -Inf , c01) / alpha;
+        end % end mu-loop
+        disp(['via Numeric Integration: ', num2str(ES_num(:, df)', '% 7.4f')]);
+end % df-loop (for df)
+
+disp(delim);
+struct_ES = struct('ES_sim', ES_sim, 'ES_num', ES_num);
+save('results/ex2_trueES.mat', 'struct_ES');
+% struct result:
+%         | df = 3 | df = 6 |
+% mu = -3 |        |        |
+% mu = -2 |        |        |
+% mu = -1 |        |        |
+% mu = 0  |        |        |
+toc
+disp(delim); disp(delim);  %took 20.562306 seconds
+%% exercise 4 (bootstrapping for first df)
 % DGP = NCT and parametric bootstrap also NCT with own MLE funtion
 % end outputs are the tables from Exercise 2
 % two different df:                           |    3|    6|     |     |
@@ -626,7 +673,7 @@ df = 3; % degrees of freedom of the NCT
 n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
-seed = 6;
+%seed = rand*1000;
 alpha = .1;
 
 ci_length_nonpara = cat(4, ...
@@ -662,7 +709,7 @@ for mu=1:numel(mu_vec)
     ci_length_nonpara(:, :, mu) = ci_length;
     coverage_ratio_nonpara(:, :, mu) = coverage_ratio;
 end % mu-loop
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -688,12 +735,12 @@ for k = 1:length(n_samp_vec)
                 para_df_hat = para_bs_hat(1); para_ncp_hat = para_bs_hat(2); para_loc_hat = para_bs_hat(3); para_scale_hat = para_bs_hat(3);
 
                 % calculate theoretical ES based on the parameter estimates
-                %c01=nctinv(alpha , para__df_hat, para_ncp_hat);
-                % what is this? I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
-                %ES_num(mu, df) = integral(I01 , -Inf , c01) / alpha;
                 c01 = nctinv(alpha , para_df_hat, para_ncp_hat);
                 ES_vec(j) = para_loc_hat + para_scale_hat * (-nctpdf(c01,para_df_hat, para_ncp_hat)/nctcdf(c01,para_df_hat, para_ncp_hat) * (para_df_hat+c01^2)/(para_df_hat-1));
-                % other way to calculate pdf (his approximation): exp(stdnctpdfln_j(z, df,ncp))
+                
+                % other way to calculate pdf (his approximation)
+                %exp(stdnctpdfln_j(z, df,ncp))
+
             end % j-loop
 
             % compute length of the CI and coverage
@@ -718,12 +765,11 @@ end % k-loop (samp size
 struct_nonpara_firstdf = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
 struct_para_firstdf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_para_firstdf', struct_para_firstdf);
-% save('results/ex2_firstdf_len+coverage.mat', 'struct_comb');
-save('ex2_firstdf_len+coverage.mat', 'struct_comb');
+save('results/ex4_firstdf_len+coverage.mat', 'struct_comb');
 
 toc
 disp(delim); disp(delim);  %took seconds
-
+%% exercise 4 (bootstrapping for second df)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % other degree of freedom parameter
 % DGP = NCT and parametric bootstrap also NCT with own MLE funtion
@@ -775,7 +821,7 @@ for mu=1:numel(mu_vec)
     ci_length_nonpara(:, :, mu) = ci_length;
     coverage_ratio_nonpara(:, :, mu) = coverage_ratio;
 end % mu-loop
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -828,11 +874,11 @@ for k = 1:length(n_samp_vec)
 end % k-loop (samp size
 
 % save
-struct_nonpara_firstdf = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
-struct_para_firstdf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
-struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_para_firstdf', struct_para_firstdf);
-% save('results/ex2_firstdf_len+coverage.mat', 'struct_comb');
-save('ex2_firstdf_len+coverage.mat', 'struct_comb');
+struct_nonpara_seconddf = struct('average_length', average_length, 'ci_length', ci_length, 'mean_coverage_ratio', mean_coverage_ratio, 'coverage_ratio', coverage_ratio);
+struct_para_seconddf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
+struct_comb = struct('struct_nonpara_seconddf', struct_nonpara_seconddf, 'struct_para_seconddf', struct_para_seconddf);
+save('results/ex4_seconddf_len+coverage.mat', 'struct_comb');
+%save('ex4_seconddf_len+coverage.mat', 'struct_comb');
 
 toc
 disp(delim); disp(delim);  %took seconds
