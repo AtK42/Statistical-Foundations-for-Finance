@@ -124,7 +124,7 @@ disp(delim); disp(delim); time_ex1 = toc - tic; disp(time_ex1); %took 16267.6167
 tic
 % define parameters
 delim = '************************************';
-n_samp = 1e7;
+n_samp = 1e7; loc = 1; scale = 2;
 %reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df_vec = [3 6]; % degrees of freedom of the NCT
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
@@ -283,8 +283,8 @@ for k = 1:length(n_samp_vec)
             end
         end % i-loop (reps)
         
-        ci_length_para = ci_length(:,:,mu);
-        coverage_para = coverage(:,:,mu);
+        ci_length_para(:, :, mu) = ci_length;
+        coverage_para(:, :, mu) = coverage;
     end % mu-loop
 
     %disp(mean(ci_length_para));
@@ -320,10 +320,31 @@ mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 ci_length = zeros([reps numel(n_samp_vec)]);
 coverage = zeros([reps numel(n_samp_vec)]);
 
-ci_length_nonpara = zeros(numel(mu), reps, numel(n_samp_vec));
-coverage_ratio_nonpara = zeros(numel(mu), reps, numel(n_samp_vec));
-ci_length_para = zeros(numel(mu), reps, numel(n_samp_vec));
-coverage_para = zeros(numel(mu), reps, numel(n_samp_vec));
+%ci_length_nonpara = zeros(numel(mu), reps, numel(n_samp_vec));
+%coverage_ratio_nonpara = zeros(numel(mu), reps, numel(n_samp_vec));
+%ci_length_para = zeros(numel(mu), reps, numel(n_samp_vec));
+%coverage_para = zeros(numel(mu), reps, numel(n_samp_vec));
+
+ci_length_nonpara = cat(4, ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
+coverage_ratio_nonpara = cat(4, ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
+ci_length_para = cat(4, ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)]), ...
+                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
+coverage_para = cat(4, ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)]), ...
+                       zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % non-parametric bootstrap %
@@ -333,8 +354,8 @@ for mu=1:numel(mu_vec)
     [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu, n_df), alpha);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
-    ci_length_nonpara(mu, :, :) = ci_length;
-    coverage_ratio_nonpara(mu, :, :) = coverage_ratio;
+    ci_length_nonpara(:, :, mu) = ci_length;
+    coverage_ratio_nonpara(:, :, mu) = coverage_ratio;
 end % mu-loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -373,15 +394,20 @@ for k = 1:length(n_samp_vec)
             % compute length of the CI and coverage
             ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
             low_para = ci_para(1); high_para = ci_para(2);
-            ci_length_para(mu, i, k) = high_para - low_para;
+            %ci_length_para(mu, i, k) = high_para - low_para;
+            ci_length(i, k) = high_para - low_para;
             if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
-                coverage_para(mu, i, k) = 1;
+                %coverage_para(mu, i, k) = 1;
+                coverage(i, k) = 1;
             end
             
             if mod(i, 10) == 0
                 disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
             end
         end % i-loop (reps)
+
+        ci_length_para = ci_length(:, :, mu);
+        coverage_para = coverage(:, :, mu);
     end % mu-loop
     
     %disp(mean(ci_length_para));
