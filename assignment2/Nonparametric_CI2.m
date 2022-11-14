@@ -103,9 +103,9 @@ for k = 1:length(n_samp_vec)
         end
         
         % info for user when running function
-        % if mod(i, 10) == 0
-        %     disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
-        % end
+        if mod(i, 10) == 0
+            disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
+        end
     end % i-loop (reps
 end % end of k-loop
 
