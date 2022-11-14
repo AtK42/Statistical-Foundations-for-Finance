@@ -129,7 +129,7 @@ n_samp = 1e7;
 df_vec = [3 6]; % degrees of freedom of the NCT
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
-seed = 6; alpha = .1;
+seed = rand*1000; alpha = .1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 1 (learn how to simulate from non-central location-scale t)
@@ -191,7 +191,7 @@ df = 3; % degrees of freedom of the NCT
 n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
-seed = rand*1000;
+% seed = rand*1000;
 alpha = .1;
 
 ci_length_nonpara = cat(4, ...
@@ -227,7 +227,7 @@ for mu=1:numel(mu_vec)
     ci_length_nonpara(:, :, mu) = ci_length;
     coverage_ratio_nonpara(:, :, mu) = coverage_ratio;
 end % mu-loop
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -287,7 +287,7 @@ struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_p
 save('ex2_firstdf_len+coverage.mat', 'struct_comb');
 
 toc
-disp(delim); disp(delim);  %took seconds
+disp(delim); disp(delim);  %took 22187.957696 seconds
 %% exercise 2 (bootstrapping for second df (part 3))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 3 - second df (report average length of CI and actual coverage with both bootstrap methods)
@@ -303,7 +303,7 @@ df = 6; % degrees of freedom of the NCT
 n_df = 2;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
-seed = 6; alpha = .1;
+%seed = rand*1000; alpha = .1;
 
 ci_length_nonpara = cat(4, ...
                         zeros([reps numel(n_samp_vec)]), ...
@@ -339,7 +339,7 @@ for mu=1:numel(mu_vec)
     ci_length_nonpara(:, :, mu) = ci_length;
     coverage_ratio_nonpara(:, :, mu) = coverage_ratio;
 end % mu-loop
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -410,8 +410,8 @@ delim = '************************************';
 loc = 2; scale = 1;
 tail_index_vec = [1.6, 1.8];
 n_samp = 1e7;
-reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
-seed = 6; alpha = .1;
+reps = 200; n_samp_vec = [250 500 2000]; %n_BS = 1000; % note that n_samp = T
+seed = rand*1000; alpha = .1;
 ci_length_para = zeros([reps length(n_samp_vec)]);
 coverage_para = zeros([reps length(n_samp_vec)]);
 
@@ -456,7 +456,7 @@ loc = 2; scale = 1;
 tail_index = 1.6; n_tail_index = 1;
 n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
-seed = 6;
+%seed = rand*1000;
 alpha = .1;
 dist = 3; % corresponds to the (symmetric) stable dist
 initvec = [2 loc scale]; % [df loc scale]
@@ -540,7 +540,7 @@ loc = 2; scale = 1;
 tail_index = 1.8; n_tail_index = 2;
 n_samp = 1e7;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
-seed = 6;
+seed = rand*1000;
 alpha = .1;
 dist = 3; % corresponds to the (symmetric) stable dist
 initvec = [2 loc scale]; % [df loc scale]
