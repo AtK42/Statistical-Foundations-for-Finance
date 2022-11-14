@@ -10,9 +10,9 @@ function[df, ncp, loc, scale] = nctlikmax(x, initvec, pdfopt)
 % according to the exercise: 1 is the one from matlab and everything else
 % is his approximation method
 
-tol =1e-5; maxiter = 1000;
+tol =1e-5; maxiter = 200;
 opts=optimset('Disp', 'none', 'LargeScale', 'Off', ...
-    'TolFun', tol, 'TolX', tol, 'Maxiter',200);
+    'TolFun', tol, 'TolX', tol, 'Maxiter',maxiter);
 %opts = optimset('Display', 'notify-detailed' , 'Maxiter', maxiter, 'TolFun', tol, 'TolX', tol, 'LargeScale', 'Off');
 %opts = optimoptions('fminunc', 'Display', 'notify-detailed' , 'MaxIterations', maxiter, 'OptimalityTolerance', tol, 'StepTolerance', tol);
 MLE = fminunc(@(param) nctloglik(param, x, pdfopt), initvec, opts)
