@@ -231,10 +231,10 @@ for mu=1:numel(mu_vec)
     [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale, loc, df, mu_vec(mu)], ES_num(mu, n_df), alpha);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
-    ci_length_nonpara(mu, :, :) = ci_length;
-    coverage_ratio_nonpara(mu, :, :) = coverage_ratio;
+    ci_length_nonpara(:, :, mu) = ci_length;
+    coverage_ratio_nonpara(:, :, mu) = coverage_ratio;
 end % mu-loop
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
