@@ -191,7 +191,7 @@ df = 3; % degrees of freedom of the NCT
 n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
-seed = 6;
+seed = rand*1000;
 alpha = .1;
 
 ci_length_nonpara = cat(4, ...
