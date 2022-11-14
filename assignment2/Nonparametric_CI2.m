@@ -71,7 +71,7 @@ for k = 1:length(n_samp_vec)
         % (ii) assymetric student t
         elseif dist == 2
             % generate the random sample
-            data = asymtrnd(n_samp_vec(k), mu, df, 1); 
+            data = asymtrnd(n_samp_vec(k), mu, df); % do not set a seed! Function creates random seeds
 
         % (iii) symmetric stable
         elseif dist == 3
@@ -103,9 +103,9 @@ for k = 1:length(n_samp_vec)
         end
         
         % info for user when running function
-        if mod(i, 10) == 0
-            disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
-        end
+        % if mod(i, 10) == 0
+        %     disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
+        % end
     end % i-loop (reps
 end % end of k-loop
 

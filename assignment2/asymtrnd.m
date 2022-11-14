@@ -17,6 +17,7 @@ function sample = asymtrnd(n_samp, loc, df, seed)
     df(isinf(df)) = realmax;
 
 % for reproducable results
+    if nargin<4 , seed=rand*1000; end
     rng(seed, 'twister');
 
 % sample from the normal and non-central chisq distribution
