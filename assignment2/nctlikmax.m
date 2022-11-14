@@ -1,4 +1,4 @@
-function[df, ncp, loc, scale] = nctlikmax(x, initvec, pdfopt)
+function eigene_MLE = nctlikmax(x, initvec, pdfopt)
 % MLE of the singly NCT distribution for all four parameters, being
 % the degrees of freedom (df), the noncentrality parameter (ncp), the 
 % location (loc) and the scale (scale)
@@ -10,12 +10,12 @@ function[df, ncp, loc, scale] = nctlikmax(x, initvec, pdfopt)
 % according to the exercise: 1 is the one from matlab and everything else
 % is his approximation method
 
-tol =1e-5; maxiter = 200;
+tol =1e-3; maxiter = 100;
 opts=optimset('Disp', 'none', 'LargeScale', 'Off', ...
     'TolFun', tol, 'TolX', tol, 'Maxiter',maxiter);
 %opts = optimset('Display', 'notify-detailed' , 'Maxiter', maxiter, 'TolFun', tol, 'TolX', tol, 'LargeScale', 'Off');
 %opts = optimoptions('fminunc', 'Display', 'notify-detailed' , 'MaxIterations', maxiter, 'OptimalityTolerance', tol, 'StepTolerance', tol);
-MLE = fminunc(@(param) nctloglik(param, x, pdfopt), initvec, opts)
+eigene_MLE = fminunc(@(param) nctloglik(param, x, pdfopt), initvec, opts);
     
 function ll = nctloglik(param, x, pdfopt)
 df=param(1); ncp=param(2); loc=param(3); scale=param(4);

@@ -152,7 +152,7 @@ for df = 1:numel(df_vec)
         disp(delim); disp(['for df = ', num2str(df_vec(df))]);
     % (i) Simulation:
         for mu = 1:numel(mu_vec)
-                ES_sim(mu, df) = Simulated_ES_NCT(n_samp, df_vec(df), mu_vec(mu), alpha, seed);
+                ES_sim(mu, df) = loc + scale * Simulated_ES_NCT(n_samp, df_vec(df), mu_vec(mu), alpha, seed);
         end % end mu-loop
         disp(['via Simulation:          ', num2str(ES_sim(:, df)', '% 7.4f')]);
 
@@ -160,14 +160,14 @@ for df = 1:numel(df_vec)
         for mu = 1:numel(mu_vec)
                 c01=nctinv(alpha , df_vec(df), mu_vec(mu));
                 I01 = @(x) x.*nctpdf(x, df_vec(df), mu_vec(mu)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
-                ES_num(mu, df) = integral(I01 , -Inf , c01) / alpha;
+                ES_num(mu, df) = loc + scale * integral(I01 , -Inf , c01) / alpha;
         end % end mu-loop
         disp(['via Numeric Integration: ', num2str(ES_num(:, df)', '% 7.4f')]);
 end % df-loop (for df)
 
 disp(delim);
 struct_ES = struct('ES_sim', ES_sim, 'ES_num', ES_num);
-save('results/ex2_trueES.mat', 'struct_ES');
+save('ex2_trueES.mat', 'struct_ES');
 % struct result:
 %         | df = 3 | df = 6 |
 % mu = -3 |        |        |
@@ -185,7 +185,7 @@ disp(delim); disp(delim);  %took 20.562306 seconds
 % % four different asymmetry parameters (mu):   |   -3|   -2|   -1|    0|
 tic
 delim = '************************************';
-loc = 2; scale = 2;
+loc = 1; scale = 2;
 reps = 20; n_samp_vec = [250 500 2000]; n_BS = 200; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
 n_df = 1;
@@ -194,8 +194,8 @@ mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 % seed = rand*1000;
 alpha = .1;
 
-%ci_length = zeros([reps numel(n_samp_vec)]);
-%coverage = zeros([reps numel(n_samp_vec)]);
+ci_length = zeros([reps numel(n_samp_vec)]);
+coverage = zeros([reps numel(n_samp_vec)]);
 
 ci_length_nonpara = zeros(numel(mu), reps, numel(n_samp_vec));
 coverage_ratio_nonpara = zeros(numel(mu), reps, numel(n_samp_vec));
@@ -210,13 +210,13 @@ coverage_para = zeros(numel(mu), reps, numel(n_samp_vec));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [df, mu_vec(mu)], ES_num(mu, n_df), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale, loc, df, mu_vec(mu)], ES_num(mu, n_df), alpha);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
     ci_length_nonpara(mu, :, :) = ci_length;
     coverage_ratio_nonpara(mu, :, :) = coverage_ratio;
 end % mu-loop
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
