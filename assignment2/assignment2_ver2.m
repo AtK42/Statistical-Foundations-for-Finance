@@ -252,7 +252,7 @@ ci_length = zeros([reps 1]);
 coverage = zeros([reps 1]);
 
 %!!check coverage rate (might be wrong still)!!
-disp(delim); disp(['for df = ', num2str(df)]);
+disp(delim); disp(['ex2: parametric bootstrap for df = ', num2str(df)]);
 for k = 1:length(n_samp_vec)
     disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
     for mu = 1:numel(mu_vec)
