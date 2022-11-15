@@ -1,4 +1,4 @@
-function [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, trueES, alpha)
+function [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, trueES, alpha, a)
 % function to calculate the non-parametric CI
 
 % input parameters:
@@ -11,7 +11,7 @@ function [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonp
 %               (iii)   the symmetric stable (case 3)
 % % params      paremeter specifications for the true distribution and what the true ES would be
 %               (i)     the symmetric student t:    param = [scale, location, df]
-%               (ii)    the asymmetric student t:   param = [sacle, location, df, mu]
+%               (ii)    the asymmetric student t:   param = [scale, location, df, mu]
 %               (iii)   the symmetric stable:       param = [a, scale, location]
 
 % output:       a vector with 
@@ -38,7 +38,7 @@ elseif dist == 3
         error("'params' should be a double 1x3 vector where 'params(1)' is the tail index alpha, 'params(2)' is the scale and 'params(3)' is the location")
     end
     % define each element of the params vecotr into a separate variable
-    a = params(1); scale = params(2); location = params(3);
+    a_p = params(1); scale = params(2); location = params(3);
 else
     error("Please specify a valid distribution. See function documentation for more information.");
 end
@@ -76,7 +76,7 @@ for k = 1:length(n_samp_vec)
         % (iii) symmetric stable
         elseif dist == 3
             % generate the random sample
-            data = stblrnd(a, 0, scale, location, n_samp_vec(k), 1);
+            data = stblrnd(a_p, 0, scale, location, n_samp_vec(k), 1);
         end
 
         %ESvec=zeros(n_BS,1);
@@ -93,7 +93,7 @@ for k = 1:length(n_samp_vec)
         end
         
         % calculate CI
-        ci = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        ci = quantile(ES_vec, [a/2 1-a/2]);
         lower_bound = ci(1); upper_bound = ci(2);
         ci_len(i, k) = upper_bound - lower_bound;
 
