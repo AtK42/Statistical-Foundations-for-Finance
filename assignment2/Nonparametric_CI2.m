@@ -1,4 +1,4 @@
-function [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, trueES, alpha)
+function [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, trueES, alpha, a)
 % function to calculate the non-parametric CI
 
 % input parameters:
@@ -93,7 +93,7 @@ for k = 1:length(n_samp_vec)
         end
         
         % calculate CI
-        ci = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        ci = quantile(ES_vec, [a/2 1-a/2]);
         lower_bound = ci(1); upper_bound = ci(2);
         ci_len(i, k) = upper_bound - lower_bound;
 

@@ -3,7 +3,7 @@ tic
 % define parameters
 delim = '************************************';
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
-df = 2; loc = 1; scale = 2; alpha = .1;
+df = 2; loc = 1; scale = 2; alpha = .01; a = 0.1;
 para_method = "MP";
 
 % set seed
@@ -30,7 +30,7 @@ trueES = ES_LS_analytic;
 % nonparametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(delim); disp('non-parametric bootstrap');
-[ci_length_nonpara, coverage_ratio_nonpara, average_length_nonpara, mean_coverage_ratio_nonpara] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 1, [scale, loc, df], trueES, alpha);
+[ci_length_nonpara, coverage_ratio_nonpara, average_length_nonpara, mean_coverage_ratio_nonpara] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 1, [scale, loc, df], trueES, alpha, a);
 disp('***');
 disp(['Average nonparametric CI Length: ', num2str(average_length, '% 7.4f')]);
 disp(['Nonparametric Coverage Ratio:    ', num2str(mean_coverage_ratio, '% 7.4f')]);
@@ -84,7 +84,7 @@ for k = 1:length(n_samp_vec)
 
         % compute length of the CI and coverage
         % % matlab
-        ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        ci_para = quantile(ES_vec, [a/2 1-a/2]);
         low_para = ci_para(1); high_para = ci_para(2);
         ci_length_para(i, k) = high_para - low_para;
         if ES_LS_analytic >= low_para && ES_LS_analytic <= high_para
@@ -92,7 +92,7 @@ for k = 1:length(n_samp_vec)
         end
         
         % % MP
-        ci_para_MP = quantile(ES_vec_MP, [alpha/2 1-alpha/2]);
+        ci_para_MP = quantile(ES_vec_MP, [a/2 1-a/2]);
         low_para_MP = ci_para_MP(1); high_para_MP = ci_para_MP(2);
         ci_length_para_MP(i, k) = high_para_MP - low_para_MP;
         if ES_LS_analytic >= low_para_MP && ES_LS_analytic <= high_para_MP
@@ -122,7 +122,7 @@ disp(delim);
 struct_para = struct('mean_ci_length_para'   , mean(ci_length_para)   , 'ci_length_para'   , ci_length_para   , 'mean_coverage_para'   , mean(coverage_para)   , 'coverage_para'   , coverage_para);
 struct_para_MP = struct('mean_ci_length_para_MP', mean(ci_length_para_MP), 'ci_length_para_MP', ci_length_para_MP, 'mean_coverage_para_MP', mean(coverage_para_MP), 'coverage_para_MP', coverage_para_MP);
 struct_comb = struct('struct_nonpara', struct_nonpara, 'struct_para', struct_para, 'struct_para_MP', struct_para_MP);
-save('results/ex1.mat', 'struct_comb')
+save('ex1.mat', 'struct_comb')
 
 % struct
 %         | n_samp = 250 | n_samp = 500 | n_samp = 2000 |
@@ -139,7 +139,7 @@ n_samp = 1e7; loc = 1; scale = 2;
 df_vec = [3 6]; % degrees of freedom of the NCT
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
-seed = rand*1000; alpha = .1;
+seed = rand*1000; alpha = .01; a = 0.1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 1 (learn how to simulate from non-central location-scale t)
@@ -202,7 +202,7 @@ n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 % seed = rand*1000;
-alpha = .1;
+alpha = .01; a = 0.1;
 
 ci_length = zeros([reps 1]);
 coverage = zeros([reps 1]);
@@ -238,7 +238,7 @@ coverage_para = cat(4, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale, loc, df, mu_vec(mu)], ES_num(mu, n_df), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale, loc, df, mu_vec(mu)], ES_num(mu, n_df), alpha, a);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
     ci_length_nonpara(:, :, mu) = ci_length;
@@ -289,7 +289,7 @@ for k = 1:length(n_samp_vec)
             end % j-loop
 
             % compute length of the CI and coverage
-            ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+            ci_para = quantile(ES_vec, [a/2 1-a/2]);
             low_para = ci_para(1); high_para = ci_para(2);
             %ci_length_para(mu, i, k) = high_para - low_para;
             ci_length(i) = high_para - low_para;
@@ -336,7 +336,8 @@ df = 6; % degrees of freedom of the NCT
 n_df = 2;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
-%seed = rand*1000; alpha = .1;
+%seed = rand*1000;
+alpha = .01; a = 0.1;
 
 ci_length = zeros([reps numel(n_samp_vec)]);
 coverage = zeros([reps numel(n_samp_vec)]);
@@ -372,7 +373,7 @@ coverage_para = cat(4, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['ex2: non-parametric bootstrap for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale, loc, df, mu_vec(mu)], ES_num(mu, n_df), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale, loc, df, mu_vec(mu)], ES_num(mu, n_df), alpha, a);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
     ci_length_nonpara(:, :, mu) = ci_length;
@@ -422,7 +423,7 @@ for k = 1:length(n_samp_vec)
             end % j-loop
 
             % compute length of the CI and coverage
-            ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+            ci_para = quantile(ES_vec, [a/2 1-a/2]);
             low_para = ci_para(1); high_para = ci_para(2);
             %ci_length_para(mu, i, k) = high_para - low_para;
             ci_length(i) = high_para - low_para;
@@ -465,7 +466,7 @@ loc = 1; scale = 2;
 tail_index_vec = [1.6, 1.8];
 n_samp = 1e8;
 %reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
-seed = rand*1000; alpha = .1;
+seed = rand*1000; alpha = .01; a = 0.1;
 
 ES_sim = zeros(numel(tail_index_vec), 1); % mümmer glaub ich ned mache 
 ES_stoy = zeros(numel(tail_index_vec), 1);
@@ -519,7 +520,7 @@ coverage_para = zeros([reps length(n_samp_vec)]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['ex3: non-parametric bootstrap for tail_index = ', num2str(tail_index)]);
 params = [tail_index, scale, loc];
-[ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha);
+[ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha, a);
 disp(['Average nonparametric CI Length: ', num2str(average_length, ' % 7.4f')]);
 disp(['Nonparametric Coverage Ratio:    ', num2str(mean_coverage_ratio, ' % 7.4f')]);
 
@@ -564,7 +565,7 @@ for k = 1:length(n_samp_vec)
         end % j-loop
 
         % compute length of the CI and coverage
-        ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        ci_para = quantile(ES_vec, [a/2 1-a/2]);
         low_para = ci_para(1); high_para = ci_para(2);
         ci_length_para(i, k) = high_para - low_para;
         if ES_stoy(n_tail_index) >= low_para && ES_stoy(n_tail_index) <= high_para
@@ -598,7 +599,7 @@ loc = 1; scale = 2;
 tail_index = 1.8; n_tail_index = 2;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 %seed = rand*1000;
-alpha = .1;
+alpha = .01; a = 0.1;
 dist = 3; % corresponds to the (symmetric) stable dist
 initvec = [2 loc scale]; % [df loc scale]
 
@@ -610,7 +611,7 @@ coverage_para = zeros([reps length(n_samp_vec)]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['ex3: non-parametric bootstrap for tail_index = ', num2str(tail_index)]);
 params = [tail_index, scale, loc];
-[ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha);
+[ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, dist, params, ES_stoy(n_tail_index), alpha, a);
 disp(['Average nonparametric CI Length: ', num2str(average_length, ' % 7.4f')]);
 disp(['Nonparametric Coverage Ratio:    ', num2str(mean_coverage_ratio, ' % 7.4f')]);
 
@@ -655,7 +656,7 @@ for k = 1:length(n_samp_vec)
         end % j-loop
 
         % compute length of the CI and coverage
-        ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+        ci_para = quantile(ES_vec, [a/2 1-a/2]);
         low_para = ci_para(1); high_para = ci_para(2);
         ci_length_para(i, k) = high_para - low_para;
         if ES_stoy(n_tail_index) >= low_para && ES_stoy(n_tail_index) <= high_para
@@ -686,7 +687,7 @@ n_samp = 1e7; loc = 1; scale = 2;
 df_vec = [3 6]; % degrees of freedom of the NCT
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
-seed = rand*1000; alpha = .1;
+seed = rand*1000; alpha = .01; a = 0.1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 2 (calculate true ES of the NTC for the following parameters and via
@@ -772,7 +773,7 @@ coverage_para = cat(4, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale loc df, mu_vec(mu)], ES_num(mu, n_df), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale loc df, mu_vec(mu)], ES_num(mu, n_df), alpha, a);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
     ci_length_nonpara(:, :, mu) = ci_length;
@@ -822,7 +823,7 @@ for k = 1:length(n_samp_vec)
             end % j-loop
 
             % compute length of the CI and coverage
-            ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+            ci_para = quantile(ES_vec, [a/2 1-a/2]);
             low_para = ci_para(1); high_para = ci_para(2);
             ci_length_para(i, k, mu) = high_para - low_para;
             if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
@@ -863,7 +864,7 @@ n_df = 2;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 seed = 6;
-alpha = .1;
+alpha = .01; a = 0.1;
 
 ci_length_nonpara = cat(4, ...
                         zeros([reps numel(n_samp_vec)]), ...
@@ -892,7 +893,7 @@ coverage_para = cat(4, ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
-    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale, loc, df, mu_vec(mu)], ES_num(mu, n_df), alpha);
+    [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 2, [scale, loc, df, mu_vec(mu)], ES_num(mu, n_df), alpha, a);
     disp(['Average nonparametric CI Length with mu = ', num2str(mu_vec(mu)),  ': ', num2str(average_length, '% 7.4f')]);
     disp(['Nonparametric Coverage Ratio: with mu =   ', num2str(mu_vec(mu)),  ': ', num2str(mean_coverage_ratio, '% 7.4f')]);
     ci_length_nonpara(:, :, mu) = ci_length;
@@ -941,7 +942,7 @@ for k = 1:length(n_samp_vec)
             end % j-loop
 
             % compute length of the CI and coverage
-            ci_para = quantile(ES_vec, [alpha/2 1-alpha/2]);
+            ci_para = quantile(ES_vec, [a/2 1-a/2]);
             low_para = ci_para(1); high_para = ci_para(2);
             ci_length_para(i, k, mu) = high_para - low_para;
             if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
