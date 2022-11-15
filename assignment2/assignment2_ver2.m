@@ -2,8 +2,8 @@
 tic
 % define parameters
 delim = '************************************';
-reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
-df = 2; loc = 1; scale = 2; alpha = .01; a = 0.1;
+reps = 10; n_samp_vec = [250 500 2000]; n_BS = 100; % note that n_samp = T
+df = 4; loc = 1; scale = 2; alpha = .01; a = 0.1;
 para_method = "MP";
 
 % set seed
@@ -32,8 +32,8 @@ trueES = ES_LS_analytic;
 disp(delim); disp(delim); disp('non-parametric bootstrap');
 [ci_length_nonpara, coverage_ratio_nonpara, average_length_nonpara, mean_coverage_ratio_nonpara] = Nonparametric_CI2(reps, n_samp_vec, n_BS, 1, [scale, loc, df], trueES, alpha, a);
 disp('***');
-disp(['Average nonparametric CI Length: ', num2str(average_length, '% 7.4f')]);
-disp(['Nonparametric Coverage Ratio:    ', num2str(mean_coverage_ratio, '% 7.4f')]);
+disp(['Average nonparametric CI Length: ', num2str(average_length_nonpara, '% 7.4f')]);
+disp(['Nonparametric Coverage Ratio:    ', num2str(mean_coverage_ratio_nonpara, '% 7.4f')]);
 
 struct_nonpara = struct('average_length', average_length_nonpara, 'ci_length', ci_length_nonpara, 'mean_coverage_ratio', mean_coverage_ratio_nonpara, 'coverage_ratio', coverage_ratio_nonpara);
 
@@ -54,7 +54,7 @@ for k = 1:length(n_samp_vec)
         para_bs_hat = tlikmax(data, initvec);
         para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
 
-        sim_para_mat = para_loc_hat + para_scale_hat * trnd(df, [n_samp_vec(k) n_BS]);
+        sim_para_mat = para_loc_hat + para_scale_hat * trnd(para_df_hat, [n_samp_vec(k) n_BS]);
         ES_vec = zeros([1 n_BS]);
         for j = 1:n_BS
             % create bootstrap sample
@@ -85,6 +85,7 @@ for k = 1:length(n_samp_vec)
         % compute length of the CI and coverage
         % % matlab
         ci_para = quantile(ES_vec, [a/2 1-a/2]);
+        disp(ci_para);
         low_para = ci_para(1); high_para = ci_para(2);
         ci_length_para(i, k) = high_para - low_para;
         if ES_LS_analytic >= low_para && ES_LS_analytic <= high_para
@@ -196,7 +197,7 @@ disp(delim); disp(delim);  %took 20.562306 seconds
 tic
 delim = '************************************';
 loc = 1; scale = 2;
-reps = 200; n_samp_vec = [250, 500, 2000]; n_BS = 1000; % note that n_samp = T
+reps = 10; n_samp_vec = [250, 500, 2000]; n_BS = 100; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
 n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
@@ -250,7 +251,6 @@ end % mu-loop
 %%%%%%%%%%%%%%%%%%%%%%%%
 ci_length = zeros([reps 1]);
 coverage = zeros([reps 1]);
-
 %!!check coverage rate (might be wrong still)!!
 disp(delim); disp(['for df = ', num2str(df)]);
 for k = 1:length(n_samp_vec)
@@ -264,10 +264,11 @@ for k = 1:length(n_samp_vec)
             para_bs_hat = tlikmax(data, initvec);
             para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
             
-            sim_para_mat = para_loc_hat + para_scale_hat * trnd(df, [n_samp_vec(k) n_BS]);
+            sim_para_mat = para_loc_hat + para_scale_hat * trnd(para_df_hat, [n_samp_vec(k) n_BS]);
             ES_vec = zeros([1 n_BS]);
             for j = 1:n_BS
                 temp = sim_para_mat(:, j);
+                initvec = [para_df_hat, para_loc_hat, para_scale_hat];
                 params_temp = tlikmax(temp, initvec); %[df, loc, scale]
 
                 % create bootstrap sample
@@ -289,7 +290,7 @@ for k = 1:length(n_samp_vec)
             end % j-loop
 
             % compute length of the CI and coverage
-            ci_para = quantile(ES_vec, [a/2 1-a/2]);
+            ci_para = quantile(ES_vec, [a/2 1-a/2])
             low_para = ci_para(1); high_para = ci_para(2);
             %ci_length_para(mu, i, k) = high_para - low_para;
             ci_length(i) = high_para - low_para;
@@ -320,7 +321,7 @@ struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_p
 save('ex2_firstdf_len+coverage.mat', 'struct_comb');
 
 toc
-disp(delim); disp(delim);  %took 18905.421121 seconds
+disp(delim); disp(delim);  %took 22187.957696 seconds
 %% exercise 2 (bootstrapping for second df (part 3))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 3 - second df (report average length of CI and actual coverage with both bootstrap methods)
@@ -399,7 +400,7 @@ for k = 1:length(n_samp_vec)
             para_bs_hat = tlikmax(data, initvec);
             para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
 
-            sim_para_mat = para_loc_hat + para_scale_hat * trnd(df, [n_samp_vec(k) n_BS]);
+            sim_para_mat = para_loc_hat + para_scale_hat * trnd(para_df_hat, [n_samp_vec(k) n_BS]);
             ES_vec = zeros([1 n_BS]);
             for j = 1:n_BS
                 temp = sim_para_mat(:, j);
@@ -449,7 +450,8 @@ end % k-loop (samp size)
 struct_nonpara_seconddf = struct('average_length', mean(ci_length_nonpara), 'ci_length', ci_length_nonpara, 'mean_coverage_ratio', mean(coverage_ratio_nonpara), 'coverage_ratio', coverage_ratio_nonpara);
 struct_para_seconddf = struct('mean_ci_length_para', mean(ci_length_para), 'ci_length_para', ci_length_para, 'mean_coverage_ratio_para', mean(coverage_para), 'coverage_ratio_para', coverage_para);
 struct_comb = struct('struct_nonpara_seconddf', struct_nonpara_seconddf, 'struct_para_seconddf', struct_para_seconddf);
-save('results/ex2_seconddf_len+coverage.mat', 'struct_comb');
+
+save('ex2_seconddf_len+coverage.mat', 'struct_comb');
 
 toc
 disp(delim); disp(delim);  %took seconds
@@ -509,7 +511,7 @@ loc = 1; scale = 2;
 tail_index = 1.6; n_tail_index = 1;
 reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 %seed = rand*1000;
-alpha = .1;
+alpha = .01; a = 0.1;
 dist = 3; % corresponds to the (symmetric) stable dist
 
 ci_length_para = zeros([reps length(n_samp_vec)]);
@@ -538,12 +540,12 @@ for k = 1:length(n_samp_vec)
     for i = 1:reps
         % generate random sample from a (symmetric) stable dist
         data = stabgen(n_samp_vec(k), tail_index, 0, scale ,loc); %don't set the seed, function takes random one
-        initvec = [df loc scale];
+        initvec = [3 loc scale];
 
         para_bs_hat = tlikmax(data, initvec);
         para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
     
-        sim_para_mat = para_loc_hat + para_scale_hat * trnd(df, [n_samp_vec(k) n_BS]);
+        sim_para_mat = para_loc_hat + para_scale_hat * trnd(para_df_hat, [n_samp_vec(k) n_BS]);
         ES_vec = zeros([1 n_BS]);
         for j = 1:n_BS
             temp = sim_para_mat(:, j);
@@ -571,11 +573,12 @@ for k = 1:length(n_samp_vec)
         if ES_stoy(n_tail_index) >= low_para && ES_stoy(n_tail_index) <= high_para
             coverage_para(i, k) = 1;
         end
-
+        
         if mod(i, 10) == 0
             disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
         end
     end % i-loop (reps)
+    disp(k);
 end % k-loop (sample size)
 disp(['Average parametric CI Length: ', num2str(mean(ci_length_para), ' % 7.4f')]);
 disp(['parametric Coverage Ratio:    ', num2str(mean(coverage_para), ' % 7.4f')]);
@@ -601,7 +604,7 @@ reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 %seed = rand*1000;
 alpha = .01; a = 0.1;
 dist = 3; % corresponds to the (symmetric) stable dist
-initvec = [2 loc scale]; % [df loc scale]
+initvec = [3 loc scale]; % [df loc scale]
 
 ci_length_para = zeros([reps length(n_samp_vec)]);
 coverage_para = zeros([reps length(n_samp_vec)]);
@@ -629,11 +632,11 @@ for k = 1:length(n_samp_vec)
     for i = 1:reps
         % generate random sample from a (symmetric) stable dist
         data = stabgen(n_samp_vec(k), tail_index, 0, scale ,loc); %don't set the seed, function takes random one
-        initvec = [df loc scale]; % [df loc scale]
+        initvec = [2 loc scale]; % [df loc scale]
         para_bs_hat = tlikmax(data, initvec);
         para_df_hat = para_bs_hat(1); para_loc_hat = para_bs_hat(2); para_scale_hat = para_bs_hat(3);
 
-        sim_para_mat = para_loc_hat + para_scale_hat * trnd(df, [n_samp_vec(k) n_BS]);
+        sim_para_mat = para_loc_hat + para_scale_hat * trnd(para_df_hat, [n_samp_vec(k) n_BS]);
         ES_vec = zeros([1 n_BS]);
         for j = 1:n_BS
             temp = sim_para_mat(:, j);
@@ -738,13 +741,13 @@ disp(delim); disp(delim);  %took 20.562306 seconds
 tic
 delim = '************************************';
 loc = 1; scale = 2;
-reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+reps = 150; n_samp_vec = [250 1000]; n_BS = 1000; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
 n_df = 1;
-mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
+mu_vec = [-2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 %seed = rand*1000;
-alpha = .1;
+alpha = .01; a = 0.1; 
 
 ci_length_nonpara = cat(4, ...
                         zeros([reps numel(n_samp_vec)]), ...
@@ -858,10 +861,10 @@ disp(delim); disp(delim);  %took seconds
 tic
 delim = '************************************';
 loc = 1; scale = 2;
-reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
+reps = 150; n_samp_vec = [250 1000]; n_BS = 1000; % note that n_samp = T
 df = 6; % degrees of freedom of the NCT
 n_df = 2;
-mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
+mu_vec = [-2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 seed = 6;
 alpha = .01; a = 0.1;
