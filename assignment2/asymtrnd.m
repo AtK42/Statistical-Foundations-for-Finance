@@ -3,7 +3,7 @@ function sample = asymtrnd(n_samp, loc, df, seed)
 % returns an [n_samp 1] vector
 
 % params
-% % n_samp:         sample size
+% % n_samp:         sample size as matrix with [rows columns]
 % % loc:            location parameter
 % % df:             degrees of freedom
 % % seed:           random seed for reproducability
@@ -21,9 +21,9 @@ function sample = asymtrnd(n_samp, loc, df, seed)
     rng(seed, 'twister');
 
 % sample from the normal and non-central chisq distribution
-    norm_rv = normrnd(loc, 1, [n_samp 1]);
+    norm_rv = normrnd(loc, 1, n_samp);
     %chisq_rv = chi2rnd(df, [n_samp 1]); % with 'normal' chisq dist
-    noncent_chisq_rv = ncx2rnd(df, 0, [n_samp 1]); % with noncentral chisq dist
+    noncent_chisq_rv = ncx2rnd(df, 0, n_samp); % with noncentral chisq dist
 
 % obtain a sample of the non-central t dist by applying the theory
     sample = norm_rv ./ sqrt(noncent_chisq_rv/df);

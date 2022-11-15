@@ -11,7 +11,7 @@ function [ci_length, coverage_ratio, average_length, mean_coverage_ratio] = Nonp
 %               (iii)   the symmetric stable (case 3)
 % % params      paremeter specifications for the true distribution and what the true ES would be
 %               (i)     the symmetric student t:    param = [scale, location, df]
-%               (ii)    the asymmetric student t:   param = [sacle, location, df, mu]
+%               (ii)    the asymmetric student t:   param = [scale, location, df, mu]
 %               (iii)   the symmetric stable:       param = [a, scale, location]
 
 % output:       a vector with 
