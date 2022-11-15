@@ -38,7 +38,7 @@ elseif dist == 3
         error("'params' should be a double 1x3 vector where 'params(1)' is the tail index alpha, 'params(2)' is the scale and 'params(3)' is the location")
     end
     % define each element of the params vecotr into a separate variable
-    a = params(1); scale = params(2); location = params(3);
+    a_p = params(1); scale = params(2); location = params(3);
 else
     error("Please specify a valid distribution. See function documentation for more information.");
 end
@@ -76,7 +76,7 @@ for k = 1:length(n_samp_vec)
         % (iii) symmetric stable
         elseif dist == 3
             % generate the random sample
-            data = stblrnd(a, 0, scale, location, n_samp_vec(k), 1);
+            data = stblrnd(a_p, 0, scale, location, n_samp_vec(k), 1);
         end
 
         %ESvec=zeros(n_BS,1);
