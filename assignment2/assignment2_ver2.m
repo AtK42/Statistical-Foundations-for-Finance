@@ -320,7 +320,7 @@ struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_p
 save('ex2_firstdf_len+coverage.mat', 'struct_comb');
 
 toc
-disp(delim); disp(delim);  %took 22187.957696 seconds
+disp(delim); disp(delim);  %took 18905.421121 seconds
 %% exercise 2 (bootstrapping for second df (part 3))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % part 3 - second df (report average length of CI and actual coverage with both bootstrap methods)
