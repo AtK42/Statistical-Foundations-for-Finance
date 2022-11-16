@@ -688,7 +688,7 @@ delim = '************************************';
 n_samp = 1e7; loc = 1; scale = 2;
 %reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df_vec = [3 6]; % degrees of freedom of the NCT
-mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
+mu_vec = [-2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %theta = 0; % denominator non-centrality parameter of the NCT (for theta = 0 one gets the singly NCT)
 seed = rand*1000; alpha = .01; a = 0.1;
 
@@ -741,7 +741,7 @@ disp(delim); disp(delim);  %took 20.562306 seconds
 tic
 delim = '************************************';
 loc = 1; scale = 2;
-reps = 150; n_samp_vec = [250 1000]; n_BS = 1000; % note that n_samp = T
+reps = 150; n_samp_vec = [250 2000]; n_BS = 1000; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
 n_df = 1;
 mu_vec = [-2 -1 0]; % (numerator) non-centrality parameter of the NCT
@@ -749,30 +749,30 @@ mu_vec = [-2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %seed = rand*1000;
 alpha = .01; a = 0.1; 
 
-ci_length_nonpara = cat(4, ...
+ci_length_nonpara = cat(3, ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
-                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
-coverage_ratio_nonpara = cat(4, ...
+                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 3
+coverage_ratio_nonpara = cat(3, ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
-                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
+                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 
 
-ci_length_para = cat(4, ...
+ci_length_para = cat(3, ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
-                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
-coverage_para = cat(4, ...
+                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 3
+coverage_para = cat(3, ...
                        zeros([reps numel(n_samp_vec)]), ...
                        zeros([reps numel(n_samp_vec)]), ...
                        zeros([reps numel(n_samp_vec)]), ...
-                       zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 4
+                       zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 3
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% non-parametric bootstrap %
+%% non-parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp(delim); disp(['for df = ', num2str(df)]);
 for mu=1:numel(mu_vec)
@@ -784,7 +784,7 @@ for mu=1:numel(mu_vec)
 end % mu-loop
 
 %%%%%%%%%%%%%%%%%%%%%%%%
-% parametric bootstrap %
+%% parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
 ci_length = zeros([reps 1]);
 coverage = zeros([reps 1]);
@@ -838,7 +838,9 @@ for k = 1:length(n_samp_vec)
             end
         end % i-loop (reps)
     end % mu-loop
+    disp("mean length")
     disp(mean(ci_length_para));
+    disp("mean coverage")
     disp(mean(coverage_para));
 end % k-loop (samp size
 
@@ -850,6 +852,7 @@ save('results/ex4_firstdf_len+coverage.mat', 'struct_comb');
 
 toc
 disp(delim); disp(delim);  %took seconds
+
 %% exercise 4 (bootstrapping for second df)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % other degree of freedom parameter
