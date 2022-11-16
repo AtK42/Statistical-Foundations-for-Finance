@@ -2,7 +2,7 @@
 tic
 % define parameters
 delim = '************************************';
-reps = 10; n_samp_vec = [250 500 2000]; n_BS = 100; % note that n_samp = T
+reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df = 4; loc = 1; scale = 2; alpha = .01; a = 0.1;
 para_method = "MP";
 
@@ -197,7 +197,7 @@ disp(delim); disp(delim);  %took 20.562306 seconds
 tic
 delim = '************************************';
 loc = 1; scale = 2;
-reps = 10; n_samp_vec = [250, 500, 2000]; n_BS = 100; % note that n_samp = T
+reps = 200; n_samp_vec = [250, 500, 2000]; n_BS = 1000; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
 n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
