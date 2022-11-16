@@ -2,7 +2,7 @@
 tic
 % define parameters
 delim = '************************************';
-reps = 10; n_samp_vec = [250 500 2000]; n_BS = 100; % note that n_samp = T
+reps = 200; n_samp_vec = [250 500 2000]; n_BS = 1000; % note that n_samp = T
 df = 4; loc = 1; scale = 2; alpha = .01; a = 0.1;
 para_method = "MP";
 
@@ -197,7 +197,7 @@ disp(delim); disp(delim);  %took 20.562306 seconds
 tic
 delim = '************************************';
 loc = 1; scale = 2;
-reps = 10; n_samp_vec = [250, 500, 2000]; n_BS = 100; % note that n_samp = T
+reps = 200; n_samp_vec = [250, 500, 2000]; n_BS = 1000; % note that n_samp = T
 df = 3; % degrees of freedom of the NCT
 n_df = 1;
 mu_vec = [-3 -2 -1 0]; % (numerator) non-centrality parameter of the NCT
@@ -252,7 +252,7 @@ end % mu-loop
 ci_length = zeros([reps 1]);
 coverage = zeros([reps 1]);
 %!!check coverage rate (might be wrong still)!!
-disp(delim); disp(['for df = ', num2str(df)]);
+disp(delim); disp(['ex2: parametric bootstrap for df = ', num2str(df)]);
 for k = 1:length(n_samp_vec)
     disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
     for mu = 1:numel(mu_vec)

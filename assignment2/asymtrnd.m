@@ -1,10 +1,10 @@
-function sample = asymtrnd(n_samp, loc, df, seed)
+function sample = asymtrnd(n_samp, mu, df, seed)
 % function to sample from the non-central t distribution
 % returns an [n_samp 1] vector
 
 % params
 % % n_samp:         sample size as matrix with [rows columns]
-% % loc:            location parameter
+% % mu:            	non-centrality parameter
 % % df:             degrees of freedom
 % % seed:           random seed for reproducability
 
