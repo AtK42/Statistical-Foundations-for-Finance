@@ -457,7 +457,7 @@ struct_comb = struct('struct_nonpara_seconddf', struct_nonpara_seconddf, 'struct
 save('ex2_seconddf_len+coverage.mat', 'struct_comb');
 
 toc
-disp(delim); disp(delim);  %took seconds
+disp(delim); disp(delim);  %took 20413.9 seconds
 %% exercise 3 (calculate true ES of stable)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % calculate true ES of the stable dist for the following parameters and via
