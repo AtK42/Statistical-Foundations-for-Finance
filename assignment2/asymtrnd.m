@@ -1,4 +1,4 @@
-function sample = asymtrnd(n_samp, mu, df, seed)
+function sample = asymtrnd(n_samp, loc, df, seed)
 % function to sample from the non-central t distribution
 % returns an [n_samp 1] vector
 

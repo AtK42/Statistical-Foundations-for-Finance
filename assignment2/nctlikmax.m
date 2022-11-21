@@ -11,8 +11,7 @@ function eigene_MLE = nctlikmax(x, initvec, pdfopt)
 % is his approximation method
 
 tol =1e-3; maxiter = 100;
-opts=optimset('Disp', 'none', 'LargeScale', 'Off', ...
-    'TolFun', tol, 'TolX', tol, 'Maxiter',maxiter);
+opts=optimset('Disp', 'iter', 'LargeScale', 'Off', 'TolFun', tol, 'TolX', tol, 'Maxiter',maxiter);
 eigene_MLE = fminunc(@(param) nctloglik(param, x, pdfopt), initvec, opts);
     
 function ll = nctloglik(param, x, pdfopt)
@@ -25,6 +24,5 @@ if pdfopt == 1
 else
     pdf = exp(stdnctpdfln_j(z, df,ncp))/scale; %his approximation
 end
-llvec = log(pdf);
-ll=-mean(llvec);
+llvec = log(pdf); ll=-mean(llvec);
 if isinf(ll), ll =1e5; end

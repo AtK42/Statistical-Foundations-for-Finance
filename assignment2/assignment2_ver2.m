@@ -249,15 +249,17 @@ end % mu-loop
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
-ci_length = zeros([reps 1]);
-coverage = zeros([reps 1]);
 %!!check coverage rate (might be wrong still)!!
 disp(delim); disp(['ex2: parametric bootstrap for df = ', num2str(df)]);
 for k = 1:length(n_samp_vec)
     disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
     for mu = 1:numel(mu_vec)
-    disp(['   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu))]);
+        disp(['   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu))]);
+        ci_length = zeros([reps 1]);
+        coverage = zeros([reps 1]);
+
         for i = 1:reps
+
             % generate random sample of a (regular) loc-scale t dist
             data = loc + scale * asymtrnd([n_samp_vec(k) 1], mu_vec(mu), df);
             initvec = [df loc scale]; % [df loc scale]
@@ -290,7 +292,7 @@ for k = 1:length(n_samp_vec)
             end % j-loop
 
             % compute length of the CI and coverage
-            ci_para = quantile(ES_vec, [a/2 1-a/2])
+            ci_para = quantile(ES_vec, [a/2 1-a/2]);
             low_para = ci_para(1); high_para = ci_para(2);
             %ci_length_para(mu, i, k) = high_para - low_para;
             ci_length(i) = high_para - low_para;
@@ -305,8 +307,8 @@ for k = 1:length(n_samp_vec)
         end % i-loop (reps)
         ci_length_para(:, k, 1, mu) = ci_length;
         coverage_para(:, k, 1, mu) = coverage;
-%        ci_length_para(:, k, 1, mu) = ci_length(:, k);
-%        coverage_para(:, k, 1, mu) = coverage(:, k);
+        % ci_length_para(:, k, 1, mu) = ci_length(:, k);
+        % coverage_para(:, k, 1, mu) = coverage(:, k);
     end % mu-loop
 
     %disp(mean(ci_length_para));
@@ -384,8 +386,6 @@ end % mu-loop
 %%%%%%%%%%%%%%%%%%%%%%%%
 % parametric bootstrap %
 %%%%%%%%%%%%%%%%%%%%%%%%
-ci_length = zeros([reps 1]);
-coverage = zeros([reps 1]);
 
 %!!check coverage rate (might be wrong still)!!
 disp(delim); disp(['ex2: parametric bootstrap for df = ', num2str(df)]);
@@ -393,6 +393,9 @@ for k = 1:length(n_samp_vec)
     disp('***'); disp(['starting calculations for sample size = ', num2str(n_samp_vec(k))]);
     for mu = 1:numel(mu_vec)
     disp(['   starting calculations for non-centrality param mu = ', num2str(mu_vec(mu))]);
+        ci_length = zeros([reps 1]);
+        coverage = zeros([reps 1]);
+
         for i = 1:reps
             % generate random sample of a (regular) loc-scale t dist
             data = loc + scale * asymtrnd([n_samp_vec(k) 1], mu_vec(mu), df);
@@ -454,7 +457,7 @@ struct_comb = struct('struct_nonpara_seconddf', struct_nonpara_seconddf, 'struct
 save('ex2_seconddf_len+coverage.mat', 'struct_comb');
 
 toc
-disp(delim); disp(delim);  %took seconds
+disp(delim); disp(delim);  %took 20413.9 seconds
 %% exercise 3 (calculate true ES of stable)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % calculate true ES of the stable dist for the following parameters and via
