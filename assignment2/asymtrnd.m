@@ -21,7 +21,7 @@ function sample = asymtrnd(n_samp, mu, df, seed)
     rng(seed, 'twister');
 
 % sample from the normal and non-central chisq distribution
-    norm_rv = normrnd(loc, 1, [n_samp 1]);
+    norm_rv = normrnd(mu, 1, [n_samp 1]);
     chisq_rv = chi2rnd(df, [n_samp 1]); % with 'normal' chisq dist
     %noncent_chisq_rv = ncx2rnd(df, 0, n_samp); % with noncentral chisq dist
 
