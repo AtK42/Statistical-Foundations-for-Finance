@@ -755,10 +755,8 @@ alpha = .01; a = 0.1;
 ci_length_nonpara = cat(3, ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
-                        zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 3
 coverage_ratio_nonpara = cat(3, ...
-                        zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)]), ...
                         zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 
@@ -807,35 +805,22 @@ for k = 1:length(n_samp_vec)
             sim_para_mat = para_loc_hat + para_scale_hat * asymtrnd([n_samp_vec(k) n_BS], para_mu_hat, para_df_hat);
             ES_vec = zeros([1 n_BS]);
             for j = 1:n_BS
+                %create bootstrap sample
                 temp = sim_para_mat(:, j);
+                %estimate parameters of bootstrap sample
                 params_temp = nctlikmax(temp, initvec, 2); %[df mu loc scale]
-                % create bootstrap sample
-                %ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
-                %bs_samp = data(ind);
-
-                % parametric
-                %para_bs_hat = nctlikmax(bs_samp, initvec, 2); %the 2 is which pdf calculationmethod is taken
-                %para_df_hat = para_bs_hat(1); para_ncp_hat = para_bs_hat(2); para_loc_hat = para_bs_hat(3); para_scale_hat = para_bs_hat(3);
-
                 % calculate theoretical ES based on the parameter estimates
                 c01 = nctinv(alpha , params_temp(1), params_temp(2));
-                I01 = @(x) x.*nctpdf(x, params_temp(1), params_temp(2)); %note that the problem with nctpdf mentioned in footnote 11 on p.373 in the intermediate prob book has been solved in the standard matlab function, hence it is used here
+                I01 = @(x) x.*nctpdf(x, params_temp(1), params_temp(2));
                 ES_vec(j) = params_temp(3) + params_temp(4) * integral(I01 , -Inf , c01) / alpha;
-                %ES_vec(j) = params_temp(3) + params_temp(4) * (-nctpdf(c01,params_temp(1), params_temp(2))/nctcdf(c01,params_temp(1), params_temp(2)) * (params_temp(1)+c01^2)/(params_temp(1)-1));
-                % other way to calculate pdf (his approximation)
-                %exp(stdnctpdfln_j(z, df,ncp))
-
             end % j-loop
-            %disp(ES_vec)
             % compute length of the CI and coverage
             ci_para = quantile(ES_vec, [a/2 1-a/2]);
-            disp(ci_para)
             low_para = ci_para(1); high_para = ci_para(2);
             ci_length_para(i, k, mu) = high_para - low_para;
             if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
                 coverage_para(i, k, mu) = 1;
             end
-
             if mod(i, 10) == 0
                 disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
             end
@@ -854,8 +839,9 @@ struct_comb = struct('struct_nonpara_firstdf', struct_nonpara_firstdf, 'struct_p
 save('results/ex4_firstdf_len+coverage.mat', 'struct_comb');
 
 toc
-disp(delim); disp(delim);  %took seconds
+disp(delim); disp(delim);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% exercise 4 (bootstrapping for second df = 6)
 % DGP = NCT and parametric bootstrap also NCT with own MLE funtion
 % end outputs are the tables from Exercise 2
@@ -873,23 +859,23 @@ mu_vec = [-2 -1 0]; % (numerator) non-centrality parameter of the NCT
 %seed = rand*1000;
 alpha = .01; a = 0.1; 
 
-%ci_length_nonpara = cat(3, ...
-%                        zeros([reps numel(n_samp_vec)]), ...
- %                       zeros([reps numel(n_samp_vec)]), ...
-  %                      zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 3
-%coverage_ratio_nonpara = cat(3, ...
- %                       zeros([reps numel(n_samp_vec)]), ...
-  %                      zeros([reps numel(n_samp_vec)]), ...
-   %                     zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 
+ci_length_nonpara = cat(3, ...
+    zeros([reps numel(n_samp_vec)]), ...
+    zeros([reps numel(n_samp_vec)]), ...
+    zeros([reps numel(n_samp_vec)]));
+coverage_ratio_nonpara = cat(3, ...
+    zeros([reps numel(n_samp_vec)]), ...
+    zeros([reps numel(n_samp_vec)]), ...
+    zeros([reps numel(n_samp_vec)]));
 
 ci_length_para = cat(3, ...
-                        zeros([reps numel(n_samp_vec)]), ...
-                        zeros([reps numel(n_samp_vec)]), ...
-                        zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 3
+    zeros([reps numel(n_samp_vec)]), ...
+    zeros([reps numel(n_samp_vec)]), ...
+    zeros([reps numel(n_samp_vec)]));
 coverage_para = cat(3, ...
-                       zeros([reps numel(n_samp_vec)]), ...
-                       zeros([reps numel(n_samp_vec)]), ...
-                       zeros([reps numel(n_samp_vec)])); % hardcode numel(mu_vec) = 3
+    zeros([reps numel(n_samp_vec)]), ...
+    zeros([reps numel(n_samp_vec)]), ...
+    zeros([reps numel(n_samp_vec)]));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% non-parametric bootstrap %
@@ -926,34 +912,22 @@ for k = 1:length(n_samp_vec)
             sim_para_mat = para_loc_hat + para_scale_hat * asymtrnd([n_samp_vec(k) n_BS], para_mu_hat, para_df_hat);
             ES_vec = zeros([1 n_BS]);
             for j = 1:n_BS
+                %create bootstrap sample
                 temp = sim_para_mat(:, j);
+                %estimate parameters of bootstrap sample
                 params_temp = nctlikmax(temp, initvec, 2); %[df mu loc scale]
-                % create bootstrap sample
-                %ind = unidrnd(n_samp_vec(k), [n_samp_vec(k) 1]);
-                %bs_samp = data(ind);
-
-                % parametric
-                %para_bs_hat = nctlikmax(bs_samp, initvec, 2); %the 2 is which pdf calculationmethod is taken
-                %para_df_hat = para_bs_hat(1); para_ncp_hat = para_bs_hat(2); para_loc_hat = para_bs_hat(3); para_scale_hat = para_bs_hat(3);
-
                 % calculate theoretical ES based on the parameter estimates
                 c01 = nctinv(alpha , params_temp(1), params_temp(2));
-                ES_vec(j) = params_temp(3) + params_temp(4) * (-nctpdf(c01,params_temp(1), params_temp(2))/nctcdf(c01,params_temp(1), params_temp(2)) * (params_temp(1)+c01^2)/(params_temp(1)-1));
-                
-                % other way to calculate pdf (his approximation)
-                %exp(stdnctpdfln_j(z, df,ncp))
-
+                I01 = @(x) x.*nctpdf(x, params_temp(1), params_temp(2));
+                ES_vec(j) = params_temp(3) + params_temp(4) * integral(I01 , -Inf , c01) / alpha;
             end % j-loop
-
             % compute length of the CI and coverage
             ci_para = quantile(ES_vec, [a/2 1-a/2]);
-            ci_para
             low_para = ci_para(1); high_para = ci_para(2);
             ci_length_para(i, k, mu) = high_para - low_para;
             if ES_num(mu, n_df) >= low_para && ES_num(mu, n_df) <= high_para
                 coverage_para(i, k, mu) = 1;
             end
-
             if mod(i, 10) == 0
                 disp(['finished rep ', num2str(i), ' out of ', num2str(reps), ' (' num2str(i/reps*100, '% 2.2f'), '% done)']);
             end
