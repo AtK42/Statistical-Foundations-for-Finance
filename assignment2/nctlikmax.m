@@ -12,8 +12,6 @@ function eigene_MLE = nctlikmax(x, initvec, pdfopt)
 
 tol =1e-3; maxiter = 100;
 opts=optimset('Disp', 'iter', 'LargeScale', 'Off', 'TolFun', tol, 'TolX', tol, 'Maxiter',maxiter);
-%opts = optimset('Display', 'notify-detailed' , 'Maxiter', maxiter, 'TolFun', tol, 'TolX', tol, 'LargeScale', 'Off');
-%opts = optimoptions('fminunc', 'Display', 'notify-detailed' , 'MaxIterations', maxiter, 'OptimalityTolerance', tol, 'StepTolerance', tol);
 eigene_MLE = fminunc(@(param) nctloglik(param, x, pdfopt), initvec, opts);
     
 function ll = nctloglik(param, x, pdfopt)
