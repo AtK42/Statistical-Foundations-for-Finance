@@ -1,12 +1,47 @@
 %% 1a
-% Implement the "algorithm 3 MMF '' in the attached paper. 
+% Implement the "algorithm 3 MMF" in the attached paper. 
 % Part of this assignment is to train you to look at research articles and 
 %   implement the methods.
 % In this case, you do NOT have to read the theory, but rather just code 
 %   that algorithm, for which they give very nice pseudo-code. 
-%   I purposely chose this because they give pseudocode, and the 
-%   implementation should be very easy, and thus suitable for a masters 
-%   course.
+
+% input parameters
+true_df = 4; % freely assumed
+reps = 500; % freely assumed
+d = 10; % sample size, d for dimension, freely assumed
+n  = 100; % number of samples, n > d, freely assumed
+
+if n < d+1
+    error("sample size n must be at least d + 1 (where d: sample size)")
+end
+x_mat = trnd(true_df, d, n);
+%wgts = % element of delta_n
+
+% initialization
+nu_vec = zeros(reps);
+%nu_vec(1) = % must be strictly larger 0
+mu_vec = zeros(reps);
+mu_vec(1) = sum(x_mat, 2)/n;
+Sigma_mat = zeros(d, d, reps);
+temp = zeros(d);
+for i = 1:n
+    temp = temp + (x_mat(:,i) - mu_vec(1))*(x_mat(:,i) - mu_vec(1))';
+end
+Sigma_mat(:,:,1) = temp / n;
+
+% loop
+delta_vec = zeros(d, reps);
+gamma_vec = zeros(d, reps);
+for r = 1:reps
+
+% % e-step
+    delta_vec(r) = ( x_mat - mu_vec(r) )' * Sigma_mat(:,:,r) \ ( x_mat - mu_vec(r) );
+    gamma_vec(r) = ( nu_vec(r) + d ) / ( nu_vec(r) + delta_vec(r) );
+
+% % m-step
+    %mu_vec(r+1) = sum(wgts * gamma_vec(r)
+
+end
 %% 1b
 % Simulate a 3-variate IID multivariate Student t (with, say, 4 df), zero 
 %   mean vector but please a NON-DIAGONAL Sigma matrix that you invent ---
@@ -38,6 +73,10 @@
 %   (and maybe extra points), invent your own algorithm.
 
 % for further comments see mail
+
+
+df = 4;
+mean_vec = zeros(3, 1);
 %% 1c
 % Simulate your 3-d MVT with say T=200 and T=2000 observations, and 
 %   estimate it using the "MMF" algorithm. Repeat this 500 times, and 
