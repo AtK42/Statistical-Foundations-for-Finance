@@ -1,11 +1,11 @@
 function pdfln = stdnctpdfln_j(x, nu, gam)
-%pdf of NCT(𝜈, 𝛾), computing the log density. x is the vector of points
+%pdf of NCT, computing the log density. x is the vector of points
 %at which to evaluate the log density; nu and gam are the degrees of
 %freedom and noncentrality parameters, respectively.
 vn2 = (nu+1)/2; rho=x.^2;
 pdfln = gammaln(vn2) - 1/2*log(pi*nu) - gammaln(nu/2) - vn2*log1p(rho/nu);
 if(all(gam == 0)), return, end
-idx = (pdfln >= -37); % −36.841 = log (1e−16)
+idx = (pdfln >= -37); % -36.841 = log (1e-16)
 if(any(idx))
     gcg = gam.^2; pdfln = pdfln - 0.5*gcg; xcg = x.*gam;
     term = 0.5*log(2) + log(xcg) - 0.5*log(max(realmin, nu+rho));
@@ -22,6 +22,6 @@ if(any(idx))
     end
     pdfln = real(pdfln+logsumk);
 end
-%Program Listing 9.2: The direct density approximation to the NCT(𝜈, 𝛾), computing the
+%Program Listing 9.2: The direct density approximation to the NCT, computing the
 %log density. x is the vector of points at which to evaluate the log density; nu and gam are
 %the degrees of freedom and noncentrality parameters, respectively.
