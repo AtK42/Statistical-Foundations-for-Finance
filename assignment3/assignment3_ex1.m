@@ -7,40 +7,57 @@
 
 % input parameters
 true_df = 4; % freely assumed
+nu_null = 1; % starting df
 reps = 500; % freely assumed
-d = 10; % sample size, d for dimension, freely assumed
-n  = 100; % number of samples, n > d, freely assumed
-
-if n < d+1
-    error("sample size n must be at least d + 1 (where d: sample size)")
+dim = 10; % sample size, freely assumed
+n_samp  = 100; % number of samples, n > d, freely assumed
+df_initial = 1; % must be strictly larger 0, freely assumed
+if df_initial <= 0
+    error ("df_initial must be strictly larger 0")
 end
-x_mat = trnd(true_df, d, n);
-%wgts = % element of delta_n
+
+if n_samp < dim+1
+    error("number of samples must be less than dim + 1 (where dim: sample size)")
+end
+x_mat = trnd(true_df, dim, n_samp);
+wgts = 1/n_samp * ones(n_samp, 1); % each weight must be larger zero and we need sum(wgts) = 1 (see p. 81)
 
 % initialization
+% % nu
 nu_vec = zeros(reps);
-%nu_vec(1) = % must be strictly larger 0
-mu_vec = zeros(reps);
-mu_vec(1) = sum(x_mat, 2)/n;
-Sigma_mat = zeros(d, d, reps);
-temp = zeros(d);
-for i = 1:n
-    temp = temp + (x_mat(:,i) - mu_vec(1))*(x_mat(:,i) - mu_vec(1))';
+nu_vec(1) = df_initial; % must be strictly larger 0
+% % mu
+mu_mat = zeros(n_samp, reps);
+mu_mat(:,1) = sum(x_mat, 2)/n_samp;
+% % Sigma
+Sigma_mat = zeros(dim, dim, reps);
+temp = zeros(dim);
+for i = 1:n_samp
+    temp = temp + (x_mat(:,i) - mu_mat(:,1))*(x_mat(:,i) - mu_mat(:,1))';
 end
-Sigma_mat(:,:,1) = temp / n;
+Sigma_mat(:,:,1) = temp / n_samp;
 
 % loop
-delta_vec = zeros(d, reps);
-gamma_vec = zeros(d, reps);
+delta_mat = zeros(n_samp, reps);
+gamma_mat = zeros(n_samp, reps);
+mu_maj_temp_num = zeros(n_samp, 1); % maj stands for mise-a-jour
+Sigma_maj_temp = zeros(dim, dim);
+
 for r = 1:reps
 
-% % e-step
-    delta_vec(r) = ( x_mat - mu_vec(r) )' * Sigma_mat(:,:,r) \ ( x_mat - mu_vec(r) );
-    gamma_vec(r) = ( nu_vec(r) + d ) / ( nu_vec(r) + delta_vec(r) );
+    % % e-step
+    for i = 1:n_samp
+        delta_mat(i, r) = ( x_mat(:,i) - mu_mat(:,r) )' * Sigma_mat(:,:,r) \ ( x_mat(:, i) - mu_mat(:,r) );
+        gamma_mat(i, r) = ( nu_vec(r) + dim ) / ( nu_vec(r) + delta_mat(i, r) );
+    end
 
-% % m-step
-    %mu_vec(r+1) = sum(wgts * gamma_vec(r)
-
+    % % m-step
+    for i = 1:n_samp
+        mu_maj_temp_num = mu_maj_temp_num + wgts(i) * gamma_mat(i, r) * x_mat(:,i);
+    end
+    mu_maj_temp_denom = wgts' * gamma_mat(:,r);
+    mu_mat(:,r+1) = mu_maj_temp_num / mu_maj_temp_denom;
+    
 end
 %% 1b
 % Simulate a 3-variate IID multivariate Student t (with, say, 4 df), zero 
