@@ -6,23 +6,29 @@
 %   that algorithm, for which they give very nice pseudo-code. 
 
 % input parameters
-%true_df = 2; % freely assumed
-%initial_df = 1; % freely assumed
-%reps = 10; % freely assumed
-%dim = 10; % sample size, freely assumed
-%n_samp  = 20; % number of samples, n > d, freely assumed
-%wgts = 1/n_samp * ones(n_samp, 1); % each weight must be larger zero and we need sum(wgts) = 1 (see p. 81)
+true_df = 4; % freely assumed
+initial_df = .1; % freely assumed
+reps = 200; % freely assumed
+dim = 3; % sample size, freely assumed
+n_samp  = 2000; % number of samples, n > d, freely assumed
+wgts = 1/n_samp * ones(n_samp, 1); % each weight must be larger zero and we need sum(wgts) = 1 (see p. 81)
+
+% get random sample of a Student t dist
+%rng(4, 'twister');
+%x_mat = trnd(true_df, dim, n_samp);
+corr = corrmat(dim);
+x_mat = mvtrnd(corr, true_df, n_samp)';
 
 % call function
 %warning('off','all');
-%[nu_final, delta_mat, gamma_mat, mu_mat, Sigma_mat, nu_vec, x_mat] = ex1a_function_MMFAlgorithm(true_df, initial_df, reps, dim, n_samp, wgts);
+[nu_final, delta_mat, gamma_mat, mu_mat, Sigma_mat, nu_vec, x_mat] = ex1a_function_MMFAlgorithm_ver2(x_mat, true_df, initial_df, reps, dim, n_samp, wgts);
 %warning('on','all')
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % define input parameters
 % % get random sample of a Student t dist
-true_df = 4; dim = 1e4; n_samp = 2e4;
-%rng(42, 'twister');
+true_df = 4; dim = 1000; n_samp = 2000;
+rng(42, 'twister');
 X = trnd(true_df, dim, n_samp);
 
 % % define the weights of the samples, where each weight must be larger zero and we need sum(w) = 1 (see p. 81)
@@ -42,7 +48,7 @@ abs_criteria = 1;
 regularize = 1;
 
 % % set whether negative log-lik should be safed in each step, if yes performence will suffer
-save_obj = 1;
+save_obj = 0;
 
 % call function
 [mu, nu, sigma, num_steps, time, objective] = ex1a_iterate_studentT(X, w, step_algorithm, anz_steps, stop, abs_criteria, regularize, save_obj);
@@ -92,6 +98,9 @@ mean_vec = zeros(3, 1);
 % Crucially, you SUBTRACT THE TRUE VALUE of the parameter from your 
 %   estimates before you boxplot them, so the boxplot shows the DEVIATION 
 %   FROM THE TRUTH. Got it?
+df = 4;
+mean_vec = zeros(3, 1);
+T_vec = [200, 2000];
 %% 1d
 % Using the SAME 500 replications as above (so results are even more 
 %   comparable), do the same but using your own custom made MLE routine 

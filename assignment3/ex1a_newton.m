@@ -67,4 +67,6 @@ end
 
 % additionally to the zero, give out how many iterations were needed
 evals=2*steps+1;
+
+disp(zero);
 end

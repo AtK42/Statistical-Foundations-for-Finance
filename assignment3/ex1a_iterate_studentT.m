@@ -152,10 +152,10 @@ while arg_cont==1
 end
 
 % save log-lik if desired
-if save_obj==1
-    delta_here=sum(((sigma_r^(-1))*(X-repmat(mu_r,1,n_samp))).*(X-repmat(mu_r,1,n_samp)),1);
-    objective(r+1)=L(nu_r,mu_r,sigma_r,w,delta_here);
-end
+%if save_obj==1
+%    delta_here=sum(((sigma_r^(-1))*(X-repmat(mu_r,1,n_samp))).*(X-repmat(mu_r,1,n_samp)),1);
+%    objective(r+1)=L(nu_r,mu_r,sigma_r,w,delta_here);
+%end
 
 % stop the clock
 time=toc;
