@@ -86,7 +86,7 @@ for r = 1:reps-1
     end
 
     syms nu_solve
-    res = solve( [normcdf(nu_solve / 2) - normcdf((nu_solve + dim) / 2) + temp_sum == 0], nu_solve );
+    res = solve( [(psi(nu_solve / 2)-log(nu_solve/2)) - (psi((nu_solve + dim) / 2) - log((nu_solve + dim) / 2)) + temp_sum == 0], nu_solve );
 
     % only to get some results, delete everything except for line
     % nu_vec(r+1) = ... when things run correctly
