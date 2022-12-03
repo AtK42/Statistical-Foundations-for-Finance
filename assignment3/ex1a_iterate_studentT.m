@@ -112,7 +112,7 @@ while arg_cont==1
         if any(isnan(delta_r))
             delta_r=sum(((sigma_r^(-1))*(X-repmat(mu_r,1,n_samp))).*(X-repmat(mu_r,1,n_samp)),1);
         end
-        objective(r)=L(nu_r,mu_r,sigma_r,w,delta_r);
+        objective(r)=L(nu_r, mu_r, sigma_r, w, delta_r);
     end
     
     % use ex1a_studenT_step to get the next iterations of nu, mu, sigma and delta

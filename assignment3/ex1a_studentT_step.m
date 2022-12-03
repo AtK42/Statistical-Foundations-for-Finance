@@ -41,10 +41,11 @@ end
 
 % M-step: update the parameters
 % % for mu
-%mu_r_plus_one=sum(repmat(w.*(1./(nu_r+delta_r)),d,1).*X, 2)/sum(w.*(1./(nu_r+delta_r)), 2);
-mu_r_plus_one=sum(repmat(w.*(1./(nu_r+delta_r)),d,1).*X,2)/sum(w.*(1./(nu_r+delta_r)),2);
+mu_r_plus_one=sum(repmat(w.*(1./(nu_r+delta_r)),d,1).*X, 2)/sum(w.*(1./(nu_r+delta_r)), 2);
+%mu_r_plus_one=sum(repmat(w'.*(1./(nu_r+delta_r)),d,1).*X, 2)/sum(w'.*(1./(nu_r+delta_r)), 2);
 % % for sigma
-sigma_r_plus_one=((X-repmat(mu_r_plus_one,1,n)).*repmat(w./(nu_r+delta_r),d,1))*(X-repmat(mu_r_plus_one,1,n))'/sum(w.*(1./(nu_r+delta_r)),2)+regularize*eye(d);
+sigma_r_plus_one=((X-repmat(mu_r_plus_one,1,n)).*repmat(w./(nu_r+delta_r),d,1))*(X-repmat(mu_r_plus_one,1,n))'/sum(w .*(1./(nu_r+delta_r)),2)+regularize*eye(d);
+%sigma_r_plus_one=((X-repmat(mu_r_plus_one,1,n)).*repmat(w'./(nu_r+delta_r),d,1))*(X-repmat(mu_r_plus_one,1,n))'/sum(w'.*(1./(nu_r+delta_r)),2)+regularize*eye(d);
 % % for delta
 delta_r_plus_one=sum(((sigma_r_plus_one^(-1))*(X-repmat(mu_r_plus_one,1,n))).*(X-repmat(mu_r_plus_one,1,n)),1);
 [nu_r_plus_one,~]=nu_step(nu_r,delta_r_plus_one,d,n);
