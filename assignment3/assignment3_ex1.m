@@ -8,10 +8,12 @@
 % input parameters
 true_df = 4; % freely assumed
 initial_df = .1; % freely assumed
-reps = 200; % freely assumed
+reps_200 = 200; % freely assumed
+reps_10000 = 10000; % freely assumed
 dim = 3; % sample size, freely assumed
 n_samp  = 2000; % number of samples, n > d, freely assumed
 wgts = 1/n_samp * ones(n_samp, 1); % each weight must be larger zero and we need sum(wgts) = 1 (see p. 81)
+
 
 % get random sample of a Student t dist
 %rng(4, 'twister');
@@ -20,9 +22,10 @@ corr = corrmat(dim);
 x_mat = mvtrnd(corr, true_df, n_samp)';
 
 % call function
-%warning('off','all');
-[nu_final, delta_mat, gamma_mat, mu_mat, Sigma_mat, nu_vec, x_mat] = ex1a_function_MMFAlgorithm_ver2(x_mat, true_df, initial_df, reps, dim, n_samp, wgts);
-%warning('on','all')
+[final_nu_200, nu_vec_200, mu_200, sigma_200] = ex1a_function_MMFAlgorithm_ver3(x_mat, initial_df, wgts, reps_200);
+%[final_nu_10000, nu_vec_10000, mu_10000, sigma_10000] = ex1a_function_MMFAlgorithm_ver3(x_mat, initial_df, wgts, reps_10000);
+
+
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % define input parameters

@@ -13,17 +13,19 @@ sigma0 = 0;
 for i = 1:length(X)
     sigma0 = sigma0 + (X(:, i) - mu)*(X(:, i) - mu)';
 end
+
+
 sigma = sigma0/length(X);
-gammaold = 100;
-sigmaold = 100;
-muold = 100;
-gamma = 200;
+%gammaold = 100;
+%sigmaold = 100;
+%muold = 100;
+%gamma = 200;
 r = 1;
 while (r < 500)
     %E-step, compute weights
-    gammaold = gamma;
-    muold = mu;
-    sigmaold = sigma;
+    %gammaold = gamma;
+    %muold = mu;
+    %sigmaold = sigma;
     [delta gamma] = calculateGamma(X, v, d, sigma, mu);
     
     mu = updateMu(w, gamma, X);
