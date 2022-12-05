@@ -7,54 +7,38 @@
 
 % input parameters
 true_df = 4; % freely assumed
-initial_df = .1; % freely assumed
-reps_200 = 200; % freely assumed
-reps_10000 = 10000; % freely assumed
+initial_df = 5; % freely assumed
+iter = 500; % freely assumed
 dim = 3; % sample size, freely assumed
-n_samp  = 2000; % number of samples, n > d, freely assumed
-wgts = 1/n_samp * ones(n_samp, 1); % each weight must be larger zero and we need sum(wgts) = 1 (see p. 81)
+%n_samp_low = 2e3; % number of samples, n > d, freely assumed
+n_samp_high = 2e4;
 
+%wgts_low = 1/n_samp_low * ones(n_samp_low, 1); % each weight must be larger zero and we need sum(wgts) = 1 (see p. 81)
+wgts_high = 1/n_samp_high * ones(n_samp_high, 1); % each weight must be larger zero and we need sum(wgts) = 1 (see p. 81)
 
 % get random sample of a Student t dist
 %rng(4, 'twister');
-%x_mat = trnd(true_df, dim, n_samp);
-corr = corrmat(dim);
-x_mat = mvtrnd(corr, true_df, n_samp)';
+vcov_mat = corrmat(dim);
+%x_mat_low = mvtrnd(vcov_mat, true_df, n_samp_low)';
+x_mat_high = mvtrnd(vcov_mat, true_df, n_samp_high)';
 
 % call function
-[final_nu_200, nu_vec_200, mu_200, sigma_200] = ex1a_function_MMFAlgorithm_ver3(x_mat, initial_df, wgts, reps_200);
-%[final_nu_10000, nu_vec_10000, mu_10000, sigma_10000] = ex1a_function_MMFAlgorithm_ver3(x_mat, initial_df, wgts, reps_10000);
+%[final_nu_low, nu_vec_low, mu_low, sigma_low, stop_low] = ex1a_function_MMFAlgorithm_ver3(x_mat_low, initial_df, wgts_low, iter, 1);
+[final_nu_high, nu_vec_high, mu_high, sigma_high, stop_high] = ex1a_function_MMFAlgorithm_ver3(x_mat_high, initial_df, wgts_high, iter, 1);
 
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% define input parameters
-% % get random sample of a Student t dist
-true_df = 4; dim = 1000; n_samp = 2000;
-rng(42, 'twister');
-X = trnd(true_df, dim, n_samp);
-
-% % define the weights of the samples, where each weight must be larger zero and we need sum(w) = 1 (see p. 81)
-w = 1/n_samp * ones(n_samp, 1)';
-
-% % set the step algorithm, here MMF but you can alternatively define your own function handle
-step_algorithm = 'MMF';
-
-% % set maximum number of iterations
-anz_steps = 500;
-
-% % set stopping criteria, if 1 then stopping criteria is applied
-stop = 1;
-abs_criteria = 1;
-
-% % set whether sigma should be regularized to prevent singularity
-regularize = 1;
-
-% % set whether negative log-lik should be safed in each step, if yes performence will suffer
-save_obj = 0;
-
-% call function
-[mu, nu, sigma, num_steps, time, objective] = ex1a_iterate_studentT(X, w, step_algorithm, anz_steps, stop, abs_criteria, regularize, save_obj);
+% plot
+figure
+%plot(1:stop_low, nu_vec_low(1:stop_low), '--', 'Color', 'blue', 'DisplayName', ['samp size = ', num2str(n_samp_low)]);
+%hold on
+plot(1:stop_high, nu_vec_high(1:stop_high), 'Color', 'green', 'DisplayName', ['samp size = ', num2str(n_samp_high)]);
+yline(true_df, 'Color', 'red', 'DisplayName', ['true df = ', num2str(true_df)]);
+title('convergence of the estimated degrees of freedom using MMF algorithm');
+xlabel('iterations');
+ylabel('df');
+ylim([0, 7]);
+%legend(n_samp_low, n_samp_high, 'true df');
+legend('Location', 'northeast');
+hold off
 %% 1b
 % Simulate a 3-variate IID multivariate Student t (with, say, 4 df), zero 
 %   mean vector but please a NON-DIAGONAL Sigma matrix that you invent ---
@@ -101,9 +85,93 @@ mean_vec = zeros(3, 1);
 % Crucially, you SUBTRACT THE TRUE VALUE of the parameter from your 
 %   estimates before you boxplot them, so the boxplot shows the DEVIATION 
 %   FROM THE TRUTH. Got it?
-df = 4;
-mean_vec = zeros(3, 1);
-T_vec = [200, 2000];
+
+clear
+
+% input parameters
+reps = 500; true_df = 4; initial_df = 1; iter = 500; dim = 3; n_samp_low = 2e2; n_samp_high = 2e3;
+wgts_low = 1/n_samp_low * ones(n_samp_low, 1); wgts_high = 1/n_samp_high * ones(n_samp_high, 1);
+
+% storage
+% % variance-covariance matrix
+vcov_mat = zeros(dim, dim, reps);
+% % random sample
+x_mat_low_store = zeros(dim, n_samp_low, reps); x_mat_high_store = zeros(dim, n_samp_high, reps);
+% % nu
+final_nu_low_store = zeros(reps, 1); final_nu_high_store = zeros(reps, 1);
+% % mu
+mu_vec_low_store = zeros(dim, reps); mu_vec_high_store = zeros(dim, reps);
+% % sigma
+sigma_mat_low_store = zeros(dim, dim, reps); sigma_mat_high_store = zeros(dim, dim, reps);
+
+tic
+for r = 1:reps
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    % get random sample of a Student t dist
+    %rng(4, 'twister');
+    vcov_mat(:,:,r) = corrmat(dim);
+    x_mat_low_store(:,:,r) = mvtrnd(vcov_mat(:,:,r), true_df, n_samp_low)';
+    x_mat_high_store(:,:,r) = mvtrnd(vcov_mat(:,:,r), true_df, n_samp_high)';
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% estimation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    % call function
+    [final_nu_low, nu_vec_low, mu_low, sigma_low, stop_low] = ex1a_function_MMFAlgorithm_ver3(x_mat_low_store(:,:,r), initial_df, wgts_low, iter, 0);
+    [final_nu_high, nu_vec_high, mu_high, sigma_high, stop_high] = ex1a_function_MMFAlgorithm_ver3(x_mat_high_store(:,:,r), initial_df, wgts_high, iter, 0);
+
+    % store results
+    disp(['low: ', num2str(round(abs(final_nu_low - true_df),4)), ', high: ', num2str(round(abs(final_nu_high - true_df),4))]);
+    if mod(r, 100) == 0; disp(['*******', num2str(r), ' reps done *******']); end
+    final_nu_low_store(r) = final_nu_low; final_nu_high_store(r) = final_nu_high;
+    mu_vec_low_store(:,r) = mu_low; mu_vec_high_store(:,r) = mu_high;
+    sigma_mat_low_store(:,:,r) = sigma_low; sigma_mat_high_store(:,:,r) = sigma_high;
+end
+
+% report time to run
+time = toc;
+disp(time);
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% get deviation from true values
+final_nu_low_dev = final_nu_low_store - true_df; final_nu_high_dev = final_nu_high_store - true_df;
+mu_vec_low_dev = mu_vec_low_store; mu_vec_high_dev = mu_vec_high_store;
+sigma_mat_low_dev = sigma_mat_low_store - vcov_mat; sigma_mat_high_dev = sigma_mat_high_store - vcov_mat;
+
+% nu
+nu_plot = {final_nu_low_dev, final_nu_high_dev};
+labels = {['sample size = ', num2str(n_samp_low)], ['sample size = ', num2str(n_samp_high)]};
+
+figure('Position', [400 75 500 300])
+boxplotGroup(nu_plot, 'interGroupSpace', 5, 'PrimaryLabels', labels)
+title('degrees of freedom', 'FontName', 'FixedWidth')
+%%
+% mu
+mu_plot = {mu_vec_low_dev', mu_vec_high_dev'};
+labelset = {'A', 'B'};
+
+figure('Position', [400 75 500 300])
+boxplotGroup(mu_plot, 'interGroupSpace', 2, 'PrimaryLabels', labelset)
+title('mean vector', 'FontName', 'FixedWidth')
+subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+%%
+% sigma
+sigma_plot_low = zeros(reps, sum(sum(tril(vcov_mat)))); sigma_plot_low = zeros(reps, sum(sum(tril(vcov_mat))));
+for r = 1:reps
+    sigma_plot_low = % need matrix with col i = position (11, 21, 22, 31, 32, 33)
+end
+labelset = {'A', 'B'};
+
+boxplotGroup(x,'interGroupSpace',2, 'PrimaryLabels', labelset)
+title('variance-covariance matrix','FontName','FixedWidth')
+subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
 %% 1d
 % Using the SAME 500 replications as above (so results are even more 
 %   comparable), do the same but using your own custom made MLE routine 
@@ -111,12 +179,12 @@ T_vec = [200, 2000];
 %   easy, since I did it all for you, with 2 dimensions. You just need to 
 %   make a simple extension to 3 dimensions (3-d). See Program Listings 
 %   12.1 and 12.2 in my time series book. 
- 
+
 % More ambitiously, and for some bonus points, and very instructive, make 
 %   the 3-d MVT MLE program for dimension general d. This is actually also 
 %   easy, because I did it already: See section 12.5.3 in my time series 
 %   book for how to do this with matlab for a related model.
- 
+
 % How many parameters do you have? 
 %   3 for the location vector, 
 %   one for df, and 
@@ -124,7 +192,7 @@ T_vec = [200, 2000];
 %   (We assume we do NOT know that the diagonals are unity, so we estimate 
 %   them.) So, this is easy for fminunc or fmincon in Matlab for this small 
 %   number of parameters.
- 
+
 % Be sure to constrain the parameters with at least obvious box constraints 
 %   as I do with "einschraenk" or whatever I called it. More advanced is to 
 %   use fmincon and have the nonlinear constraint that the Sigma matrix has 
