@@ -86,7 +86,7 @@ mean_vec = zeros(3, 1);
 %   estimates before you boxplot them, so the boxplot shows the DEVIATION 
 %   FROM THE TRUTH. Got it?
 
-clear
+%clear
 
 % input parameters
 reps = 500; true_df = 4; initial_df = 1; iter = 500; dim = 3; n_samp_low = 2e2; n_samp_high = 2e3;
@@ -135,6 +135,18 @@ end
 % report time to run
 time = toc;
 disp(time);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% storing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+struct_x_mat = struct('x_mat_low', x_mat_low_store, 'x_mat_high', x_mat_high_store);
+struct_final_nu = struct('final_nu_low', final_nu_low_store, 'final_nu_high', final_nu_high_store);
+struct_mu_vec = struct('mu_vec_low', mu_vec_low_store, 'mu_vec_high', mu_vec_high_store);
+struct_sigma_mat = struct('sigma_mat_low', sigma_mat_low_store, 'sigma_mat_high', sigma_mat_high_store);
+struct_comb = struct('struct_final_nu', struct_final_nu, 'struct_mu_vec', struct_mu_vec, 'struct_sigma_mat', struct_sigma_mat);
+save('ex1c_x_mat.mat', 'struct_x_mat')
+save('ex1c_params.mat', 'struct_comb')
+
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -163,14 +175,29 @@ title('mean vector', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
 %%
 % sigma
-sigma_plot_low = zeros(reps, sum(sum(tril(vcov_mat)))); sigma_plot_low = zeros(reps, sum(sum(tril(vcov_mat))));
+sigma_plot_low_dev = zeros(reps, sum(sum(tril(vcov_mat)))); sigma_plot_high_dev = zeros(reps, sum(sum(tril(vcov_mat))));
 for r = 1:reps
-    sigma_plot_low = % need matrix with col i = position (11, 21, 22, 31, 32, 33)
+    sigma_plot_low_dev(r,1) = sigma_mat_low_dev(1,1,r);
+    sigma_plot_low_dev(r,2) = sigma_mat_low_dev(2,1,r);
+    sigma_plot_low_dev(r,3) = sigma_mat_low_dev(2,2,r);
+    sigma_plot_low_dev(r,2) = sigma_mat_low_dev(3,1,r);
+    sigma_plot_low_dev(r,2) = sigma_mat_low_dev(3,2,r);
+    sigma_plot_low_dev(r,2) = sigma_mat_low_dev(3,3,r);
+    
+    sigma_plot_high_dev(r,1) = sigma_mat_high_dev(1,1,r);
+    sigma_plot_high_dev(r,2) = sigma_mat_high_dev(2,1,r);
+    sigma_plot_high_dev(r,3) = sigma_mat_high_dev(2,2,r);
+    sigma_plot_high_dev(r,2) = sigma_mat_high_dev(3,1,r);
+    sigma_plot_high_dev(r,2) = sigma_mat_high_dev(3,2,r);
+    sigma_plot_high_dev(r,2) = sigma_mat_high_dev(3,3,r);
 end
+
+sigma_plot = {sigma_plot_low_dev, sigma_plot_high_dev};
 labelset = {'A', 'B'};
 
-boxplotGroup(x,'interGroupSpace',2, 'PrimaryLabels', labelset)
-title('variance-covariance matrix','FontName','FixedWidth')
+figure('Position', [400 75 500 300])
+boxplotGroup(sigma_plot, 'interGroupSpace', 2, 'PrimaryLabels', labelset)
+title('variance-covariance matrix', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
 %% 1d
 % Using the SAME 500 replications as above (so results are even more 
