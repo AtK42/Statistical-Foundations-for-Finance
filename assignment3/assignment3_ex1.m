@@ -104,7 +104,7 @@ mu_vec_low_store = zeros(dim, reps); mu_vec_high_store = zeros(dim, reps);
 % % sigma
 sigma_mat_low_store = zeros(dim, dim, reps); sigma_mat_high_store = zeros(dim, dim, reps);
 
-tic
+tic;
 parfor r = 1:reps
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -133,8 +133,8 @@ parfor r = 1:reps
 end
 
 % report time to run
-time = toc;
-disp(time);
+time_MMF = toc;
+disp(time_MMF);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% storing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -272,6 +272,7 @@ mu_vec_ECME_low_store = zeros(dim, reps); mu_vec_ECME_high_store = zeros(dim, re
 % % sigma
 sigma_mat_ECME_low_store = zeros(dim, dim, reps); sigma_mat_ECME_high_store = zeros(dim, dim, reps);
 
+tic;
 parfor r = 1:reps
     % call function
     [mu_ECME_low, sigma_ECME_low, nu_ECME_low] = fitt(x_mat_low_store(:,:,r)');
@@ -284,7 +285,7 @@ parfor r = 1:reps
     mu_vec_ECME_low_store(:,r) = mu_ECME_low; mu_vec_ECME_high_store(:,r) = mu_ECME_high;
     sigma_mat_ECME_low_store(:,:,r) = sigma_ECME_low; sigma_mat_ECME_high_store(:,:,r) = sigma_ECME_high;
 end
-
+time_ECME = toc;
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get deviation from true values
 nu_ECME_low_dev = nu_ECME_low_store - true_df; nu_ECME_high_dev = nu_ECME_high_store - true_df;
@@ -292,7 +293,9 @@ mu_vec_ECME_low_dev = mu_vec_ECME_low_store; mu_vec_ECME_high_dev = mu_vec_ECME_
 sigma_mat_ECME_low_dev = sigma_mat_ECME_low_store - vcov_mat; sigma_mat_ECME_high_dev = sigma_mat_ECME_high_store - vcov_mat;
 
 % nu
-nu_ECME_plot = {nu_ECME_low_dev, nu_ECME_high_dev};
+nu_ECME_low_dev_adj = nu_ECME_low_dev .* (nu_ECME_low_dev <= 100);
+nu_ECME_high_dev_adj = nu_ECME_high_dev .* (nu_ECME_high_dev <= 100);
+nu_ECME_plot = {nu_ECME_low_dev_adj, nu_ECME_high_dev_adj};
 labelset = {'A', 'B'};
 
 figure('Position', [400 75 500 300])
@@ -313,19 +316,19 @@ subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2st
 el_sigma_tril = (size(vcov_mat(:,:,1),1) * (size(vcov_mat(:,:,1),1) + 1)) / 2;
 sigma_plot_low_dev = zeros(reps, el_sigma_tril); sigma_plot_high_dev = zeros(reps, el_sigma_tril);
 for r = 1:reps
-    sigma_plot_low_dev(r,1) = sigma_mat_low_dev(1,1,r);
-    sigma_plot_low_dev(r,2) = sigma_mat_low_dev(2,1,r);
-    sigma_plot_low_dev(r,3) = sigma_mat_low_dev(2,2,r);
-    sigma_plot_low_dev(r,4) = sigma_mat_low_dev(3,1,r);
-    sigma_plot_low_dev(r,5) = sigma_mat_low_dev(3,2,r);
-    sigma_plot_low_dev(r,6) = sigma_mat_low_dev(3,3,r);
+    sigma_plot_low_dev(r,1) = sigma_mat_ECME_low_dev(1,1,r);
+    sigma_plot_low_dev(r,2) = sigma_mat_ECME_low_dev(2,1,r);
+    sigma_plot_low_dev(r,3) = sigma_mat_ECME_low_dev(2,2,r);
+    sigma_plot_low_dev(r,4) = sigma_mat_ECME_low_dev(3,1,r);
+    sigma_plot_low_dev(r,5) = sigma_mat_ECME_low_dev(3,2,r);
+    sigma_plot_low_dev(r,6) = sigma_mat_ECME_low_dev(3,3,r);
     
-    sigma_plot_high_dev(r,1) = sigma_mat_high_dev(1,1,r);
-    sigma_plot_high_dev(r,2) = sigma_mat_high_dev(2,1,r);
-    sigma_plot_high_dev(r,3) = sigma_mat_high_dev(2,2,r);
-    sigma_plot_high_dev(r,4) = sigma_mat_high_dev(3,1,r);
-    sigma_plot_high_dev(r,5) = sigma_mat_high_dev(3,2,r);
-    sigma_plot_high_dev(r,6) = sigma_mat_high_dev(3,3,r);
+    sigma_plot_high_dev(r,1) = sigma_mat_ECME_high_dev(1,1,r);
+    sigma_plot_high_dev(r,2) = sigma_mat_ECME_high_dev(2,1,r);
+    sigma_plot_high_dev(r,3) = sigma_mat_ECME_high_dev(2,2,r);
+    sigma_plot_high_dev(r,4) = sigma_mat_ECME_high_dev(3,1,r);
+    sigma_plot_high_dev(r,5) = sigma_mat_ECME_high_dev(3,2,r);
+    sigma_plot_high_dev(r,6) = sigma_mat_ECME_high_dev(3,3,r);
 end
 
 sigma_plot = {sigma_plot_low_dev, sigma_plot_high_dev};
@@ -352,6 +355,7 @@ mu_vec_approx_low_store = zeros(dim, reps); mu_vec_approx_high_store = zeros(dim
 % % sigma
 sigma_mat_approx_low_store = zeros(dim, dim, reps); sigma_mat_approx_high_store = zeros(dim, dim, reps);
 
+tic;
 parfor r = 1:reps
     % call function
     [mu_approx_low, sigma_approx_low, nu_approx_low] = fitt_approx(x_mat_low_store(:,:,r)');
@@ -364,7 +368,7 @@ parfor r = 1:reps
     mu_vec_approx_low_store(:,r) = mu_approx_low; mu_vec_approx_high_store(:,r) = mu_approx_high;
     sigma_mat_approx_low_store(:,:,r) = sigma_approx_low; sigma_mat_approx_high_store(:,:,r) = sigma_approx_high;
 end
-
+time_approx = toc;
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get deviation from true values
 nu_approx_low_dev = nu_approx_low_store - true_df; nu_approx_high_dev = nu_approx_high_store - true_df;
