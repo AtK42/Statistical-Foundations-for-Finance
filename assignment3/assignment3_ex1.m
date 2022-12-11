@@ -70,11 +70,25 @@ hold off
 %   (and maybe extra points), invent your own algorithm.
 
 % for further comments see mail
+reps = 500; true_df = 4; n_samp_low = 2e2; n_samp_high = 2e3; dim = 3;
+
+% storage
+% % variance-covariance matrix
+vcov_mat = zeros(dim, dim, reps);
+% % random sample
+x_mat_low_store = zeros(dim, n_samp_low, reps); x_mat_high_store = zeros(dim, n_samp_high, reps);
+
+% see function corrmat(d)
+for r = 1:reps
+    % get random sample of a Student t dist
+    %rng(4, 'twister');
+    vcov_mat(:,:,r) = corrmat(dim);
+    x_mat_low_store(:,:,r) = mvtrnd(vcov_mat(:,:,r), true_df, n_samp_low)';
+    x_mat_high_store(:,:,r) = mvtrnd(vcov_mat(:,:,r), true_df, n_samp_high)';
+end
 
 
-df = 4;
-mean_vec = zeros(3, 1);
-%% 1c
+% 1c
 % Simulate your 3-d MVT with say T=200 and T=2000 observations, and 
 %   estimate it using the "MMF" algorithm. Repeat this 500 times, and 
 %   report wonderful colored boxplots, such as the 2nd graphic seen here,
@@ -89,14 +103,14 @@ mean_vec = zeros(3, 1);
 %clear
 
 % input parameters
-reps = 500; true_df = 4; initial_df = 1; iter = 500; dim = 3; n_samp_low = 2e2; n_samp_high = 2e3;
+initial_df = 1; iter = 500; dim = 3;
 wgts_low = 1/n_samp_low * ones(n_samp_low, 1); wgts_high = 1/n_samp_high * ones(n_samp_high, 1);
-
+%%
 % storage
 % % variance-covariance matrix
-vcov_mat = zeros(dim, dim, reps);
+%vcov_mat = zeros(dim, dim, reps);
 % % random sample
-x_mat_low_store = zeros(dim, n_samp_low, reps); x_mat_high_store = zeros(dim, n_samp_high, reps);
+%x_mat_low_store = zeros(dim, n_samp_low, reps); x_mat_high_store = zeros(dim, n_samp_high, reps);
 % % nu
 final_nu_low_store = zeros(reps, 1); final_nu_high_store = zeros(reps, 1);
 % % mu
@@ -105,16 +119,16 @@ mu_vec_low_store = zeros(dim, reps); mu_vec_high_store = zeros(dim, reps);
 sigma_mat_low_store = zeros(dim, dim, reps); sigma_mat_high_store = zeros(dim, dim, reps);
 
 tic;
-parfor r = 1:reps
+for r = 1:reps
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% simulation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % get random sample of a Student t dist
     %rng(4, 'twister');
-    vcov_mat(:,:,r) = corrmat(dim);
-    x_mat_low_store(:,:,r) = mvtrnd(vcov_mat(:,:,r), true_df, n_samp_low)';
-    x_mat_high_store(:,:,r) = mvtrnd(vcov_mat(:,:,r), true_df, n_samp_high)';
+    %vcov_mat(:,:,r) = corrmat(dim);
+    %x_mat_low_store(:,:,r) = mvtrnd(vcov_mat(:,:,r), true_df, n_samp_low)';
+    %x_mat_high_store(:,:,r) = mvtrnd(vcov_mat(:,:,r), true_df, n_samp_high)';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% estimation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -135,7 +149,7 @@ end
 % report time to run
 time_MMF = toc;
 disp(time_MMF);
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% storing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -147,7 +161,6 @@ disp(time_MMF);
 %save('ex1c_x_mat.mat', 'struct_x_mat')
 %save('ex1c_params.mat', 'struct_comb')
 
-%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -165,6 +178,7 @@ figure('Position', [400 75 500 300])
 boxplotGroup(nu_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
 title('degrees of freedom', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'df_boxplot_MMF.png')
 
 % mu
 mu_plot = {mu_vec_low_dev', mu_vec_high_dev'};
@@ -174,6 +188,7 @@ figure('Position', [400 75 500 300])
 boxplotGroup(mu_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
 title('mean vector', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'mu_boxplot_MMF.png')
 
 % sigma
 el_sigma_tril = (size(vcov_mat(:,:,1),1) * (size(vcov_mat(:,:,1),1) + 1)) / 2;
@@ -201,7 +216,8 @@ figure('Position', [400 75 500 300])
 boxplotGroup(sigma_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
 title('variance-covariance matrix', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
-%% 1d
+saveas(gcf,'sigma_boxplot_MMF.png')
+% 1d
 % Using the SAME 500 replications as above (so results are even more 
 %   comparable), do the same but using your own custom made MLE routine 
 %   using brute force log likelihood maximization. Notice this is super 
@@ -226,7 +242,94 @@ subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2st
 %   as I do with "einschraenk" or whatever I called it. More advanced is to 
 %   use fmincon and have the nonlinear constraint that the Sigma matrix has 
 %   to be positive definite.
-%% 1e
+
+% use same 500 replications as above as the data!!
+% use x vector created above:
+%    - x_mat_low_store for T = 200
+%    - x_mat_high_store for T = 2000
+%%
+% % nu
+final_nu_ll_low_store = zeros(reps, 1); final_nu_ll_high_store = zeros(reps, 1);
+% % mu
+mu_vec_ll_low_store = zeros(dim, reps); mu_vec_ll_high_store = zeros(dim, reps);
+% % sigma
+sigma_mat_ll_low_store = zeros(dim, dim, reps); sigma_mat_ll_high_store = zeros(dim, dim, reps);
+
+tic;
+for r = 1:reps
+    params_low = MVTestimation(x_mat_low_store(:,:,r)');
+    params_high = MVTestimation(x_mat_high_store(:,:,r)');
+    sigma_low(1,1) = params_low(5); sigma_low(2,1) = params_low(6); sigma_low(3,1) = params_low(7);
+    sigma_low(2,2) = params_low(8); sigma_low(3,2) = params_low(9); sigma_low(3,3) = params_low(10);
+    sigma_high(1,1) = params_high(5); sigma_high(2,1) = params_high(6); sigma_high(3,1) = params_high(7);
+    sigma_high(2,2) = params_high(8); sigma_high(3,2) = params_high(9); sigma_high(3,3) = params_high(10);
+
+    disp(['low: ', num2str(round(abs(params_low(1) - true_df),4)), ', high: ', num2str(round(abs(params_high(1) - true_df),4))]);
+    if mod(r, 100) == 0; disp(['*******', num2str(r), ' reps done *******']); end
+    final_nu_ll_low_store(r) = params_low(1); final_nu_ll_high_store(r) = params_high(1);
+    mu_vec_ll_low_store(:,r) = params_low(2:4); mu_vec_ll_high_store(:,r) = params_high(2:4);
+    sigma_mat_ll_low_store(:,:,r) = sigma_low; sigma_mat_ll_high_store(:,:,r) = sigma_high;
+end
+time_ll = toc;
+disp(time_ll);
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% get deviation from true values
+final_nu_ll_low_dev = final_nu_ll_low_store - true_df; final_nu_ll_high_dev = final_nu_high_store - true_df;
+mu_vec_ll_low_dev = mu_vec_ll_low_store; mu_vec_ll_high_dev = mu_vec_ll_high_store;
+sigma_mat_ll_low_dev = sigma_mat_ll_low_store - vcov_mat; sigma_mat_ll_high_dev = sigma_mat_ll_high_store - vcov_mat;
+
+% nu
+nu_plot = {final_nu_ll_low_dev, final_nu_ll_high_dev};
+labelset = {'A', 'B'};
+
+figure('Position', [400 75 500 300])
+boxplotGroup(nu_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
+title('degrees of freedom', 'FontName', 'FixedWidth')
+subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'df_boxplot_ll.png')
+% mu
+mu_plot = {mu_vec_ll_low_dev', mu_vec_ll_high_dev'};
+labelset = {'A', 'B'};
+
+figure('Position', [400 75 500 300])
+boxplotGroup(mu_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
+title('mean vector', 'FontName', 'FixedWidth')
+subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'mu_boxplot_ll.png')
+
+% sigma
+el_sigma_tril = (size(vcov_mat(:,:,1),1) * (size(vcov_mat(:,:,1),1) + 1)) / 2;
+sigma_plot_ll_low_dev = zeros(reps, el_sigma_tril); sigma_plot_ll_high_dev = zeros(reps, el_sigma_tril);
+for r = 1:reps
+    sigma_plot_ll_low_dev(r,1) = sigma_mat_ll_low_dev(1,1,r);
+    sigma_plot_ll_low_dev(r,2) = sigma_mat_ll_low_dev(2,1,r);
+    sigma_plot_ll_low_dev(r,3) = sigma_mat_ll_low_dev(2,2,r);
+    sigma_plot_ll_low_dev(r,4) = sigma_mat_ll_low_dev(3,1,r);
+    sigma_plot_ll_low_dev(r,5) = sigma_mat_ll_low_dev(3,2,r);
+    sigma_plot_ll_low_dev(r,6) = sigma_mat_ll_low_dev(3,3,r);
+    
+    sigma_plot_ll_high_dev(r,1) = sigma_mat_ll_high_dev(1,1,r);
+    sigma_plot_ll_high_dev(r,2) = sigma_mat_ll_high_dev(2,1,r);
+    sigma_plot_ll_high_dev(r,3) = sigma_mat_ll_high_dev(2,2,r);
+    sigma_plot_ll_high_dev(r,4) = sigma_mat_ll_high_dev(3,1,r);
+    sigma_plot_ll_high_dev(r,5) = sigma_mat_ll_high_dev(3,2,r);
+    sigma_plot_ll_high_dev(r,6) = sigma_mat_ll_high_dev(3,3,r);
+end
+
+sigma_plot_ll = {sigma_plot_ll_low_dev, sigma_plot_ll_high_dev};
+labelset = {'A', 'B'};
+
+figure('Position', [400 75 500 300])
+boxplotGroup(sigma_plot_ll, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
+title('variance-covariance matrix', 'FontName', 'FixedWidth')
+subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'sigma_boxplot_ll.png')
+
+% 1e
 % Using the SAME 500 replications as above (so results are even more 
 %   comparable), do the same but using the ECME algorithm from
 %   C Liu and D B Rubin, (1995) "ML estimation of the t distribution using 
@@ -259,10 +362,10 @@ subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2st
 % So, bottom line: Also report the computation times for the various 
 %   algorithms. We obviously expect the brute force MLE to be the slowest.
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% 1st algo: ECME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% estimation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % storage
 % % nu
@@ -273,7 +376,7 @@ mu_vec_ECME_low_store = zeros(dim, reps); mu_vec_ECME_high_store = zeros(dim, re
 sigma_mat_ECME_low_store = zeros(dim, dim, reps); sigma_mat_ECME_high_store = zeros(dim, dim, reps);
 
 tic;
-parfor r = 1:reps
+for r = 1:reps
     % call function
     [mu_ECME_low, sigma_ECME_low, nu_ECME_low] = fitt(x_mat_low_store(:,:,r)');
     [mu_ECME_high, sigma_ECME_high, nu_ECME_high] = fitt(x_mat_high_store(:,:,r)');
@@ -286,7 +389,9 @@ parfor r = 1:reps
     sigma_mat_ECME_low_store(:,:,r) = sigma_ECME_low; sigma_mat_ECME_high_store(:,:,r) = sigma_ECME_high;
 end
 time_ECME = toc;
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+disp(time_ECME);
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get deviation from true values
 nu_ECME_low_dev = nu_ECME_low_store - true_df; nu_ECME_high_dev = nu_ECME_high_store - true_df;
 mu_vec_ECME_low_dev = mu_vec_ECME_low_store; mu_vec_ECME_high_dev = mu_vec_ECME_high_store;
@@ -302,6 +407,7 @@ figure('Position', [400 75 500 300])
 boxplotGroup(nu_ECME_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset, 'OutlierSize', 5)
 title('degrees of freedom', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'df_boxplot_ECME.png')
 
 % mu
 mu_ECME_plot = {mu_vec_ECME_low_dev', mu_vec_ECME_high_dev'};
@@ -311,6 +417,7 @@ figure('Position', [400 75 500 300])
 boxplotGroup(mu_ECME_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
 title('mean vector', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'mu_boxplot_ECME.png')
 
 % sigma
 el_sigma_tril = (size(vcov_mat(:,:,1),1) * (size(vcov_mat(:,:,1),1) + 1)) / 2;
@@ -338,15 +445,16 @@ figure('Position', [400 75 500 300])
 boxplotGroup(sigma_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
 title('variance-covariance matrix', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'sigma_boxplot_ECME.png')
 
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% 2nd algo: approx %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% estimation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % note that c is the median not the mean of the data
-
+%%
 % storage
 % % nu
 nu_approx_low_store = zeros(reps, 1); nu_approx_high_store = zeros(reps, 1);
@@ -356,7 +464,7 @@ mu_vec_approx_low_store = zeros(dim, reps); mu_vec_approx_high_store = zeros(dim
 sigma_mat_approx_low_store = zeros(dim, dim, reps); sigma_mat_approx_high_store = zeros(dim, dim, reps);
 
 tic;
-parfor r = 1:reps
+for r = 1:reps
     % call function
     [mu_approx_low, sigma_approx_low, nu_approx_low] = fitt_approx(x_mat_low_store(:,:,r)');
     [mu_approx_high, sigma_approx_high, nu_approx_high] = fitt_approx(x_mat_high_store(:,:,r)');
@@ -369,7 +477,9 @@ parfor r = 1:reps
     sigma_mat_approx_low_store(:,:,r) = sigma_approx_low; sigma_mat_approx_high_store(:,:,r) = sigma_approx_high;
 end
 time_approx = toc;
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+disp(time_approx);
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get deviation from true values
 nu_approx_low_dev = nu_approx_low_store - true_df; nu_approx_high_dev = nu_approx_high_store - true_df;
 mu_vec_approx_low_dev = mu_vec_approx_low_store; mu_vec_approx_high_dev = mu_vec_approx_high_store;
@@ -383,6 +493,7 @@ figure('Position', [400 75 500 300])
 boxplotGroup(nu_approx_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset, 'OutlierSize', 5)
 title('degrees of freedom', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'df_boxplot_approx.png')
 
 % mu
 mu_approx_plot = {mu_vec_approx_low_dev', mu_vec_approx_high_dev'};
@@ -392,6 +503,7 @@ figure('Position', [400 75 500 300])
 boxplotGroup(mu_approx_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
 title('mean vector', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'mu_boxplot_approx.png')
 
 % sigma
 el_sigma_tril = (size(vcov_mat(:,:,1),1) * (size(vcov_mat(:,:,1),1) + 1)) / 2;
@@ -419,3 +531,4 @@ figure('Position', [400 75 500 300])
 boxplotGroup(sigma_plot, 'interGroupSpace', 5, 'PrimaryLabels', labelset)
 title('variance-covariance matrix', 'FontName', 'FixedWidth')
 subtitle(['A: sample size = ', num2str(n_samp_low), '  B: sample size: ', num2str(n_samp_high)])
+saveas(gcf,'sigma_boxplot_approx.png')
